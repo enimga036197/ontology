@@ -218,7 +218,8 @@ def create_engine_db():
             operator TEXT NOT NULL,
             step INTEGER NOT NULL,
             depth INTEGER NOT NULL,
-            origin TEXT NOT NULL
+            origin TEXT NOT NULL,
+            weight REAL NOT NULL DEFAULT 1.0
         );
         CREATE INDEX idx_patterns_step ON patterns(step);
         CREATE INDEX idx_patterns_op_shape ON patterns(operator, shape);
@@ -259,17 +260,28 @@ def seed_vocabulary(engine_conn, ontology_conn):
     engine_conn.commit()
 
 
-def ingest_triples(engine_conn, ontology_conn, glyph_map, depth):
-    """Translate and ingest ontology triples at a specific depth."""
+def get_max_ontology_depth(ontology_conn):
+    """Get the maximum depth value in the ontology."""
+    c = ontology_conn.cursor()
+    c.execute("SELECT MAX(depth) FROM triples")
+    return c.fetchone()[0] or 0
+
+
+def ingest_all_triples(engine_conn, ontology_conn, glyph_map):
+    """Translate and ingest ALL ontology triples at step 0.
+
+    Every triple gets a weight inversely proportional to its depth:
+        weight = (max_depth + 1 - depth) / (max_depth + 1)
+    So depth-0 (foundation) has weight 1.0, deepest has lowest weight.
+    """
     oc = ontology_conn.cursor()
     ec = engine_conn.cursor()
 
-    oc.execute(
-        "SELECT subject, operator, object, depth FROM triples WHERE depth = ?",
-        (depth,),
-    )
+    max_depth = get_max_ontology_depth(ontology_conn)
+
+    oc.execute("SELECT subject, operator, object, depth FROM triples")
     count = 0
-    for subj_json, operator, obj_json, d in oc.fetchall():
+    for subj_json, operator, obj_json, depth in oc.fetchall():
         subj = json.loads(subj_json)
         obj = json.loads(obj_json)
 
@@ -281,9 +293,12 @@ def ingest_triples(engine_conn, ontology_conn, glyph_map, depth):
         triple_tok = [subj_tok, op_tok, obj_tok]
         shape = compute_shape(triple_tok)
 
+        # Weight: foundation triples weigh most
+        weight = (max_depth + 1 - depth) / (max_depth + 1)
+
         ec.execute(
-            "INSERT INTO patterns (triple, shape, operator, step, depth, origin) VALUES (?, ?, ?, ?, ?, 'seed')",
-            (json.dumps(triple_tok, ensure_ascii=False), shape, op_tok, depth, depth),
+            "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, 0, ?, 'seed', ?)",
+            (json.dumps(triple_tok, ensure_ascii=False), shape, op_tok, depth, weight),
         )
         count += 1
 
@@ -295,22 +310,21 @@ def ingest_triples(engine_conn, ontology_conn, glyph_map, depth):
 # Collision detection
 # ---------------------------------------------------------------------------
 
-def find_collisions(engine_conn, step):
-    """Find structural collisions across all patterns up to this step.
+def find_collisions(engine_conn):
+    """Find structural collisions across ALL patterns in the database.
 
     Groups patterns by (operator, shape) and extracts templates from
     groups with 2+ members.
     """
     ec = engine_conn.cursor()
 
-    # Find groups with same operator and shape
+    # Find groups with same operator and shape — across everything
     ec.execute("""
         SELECT operator, shape, GROUP_CONCAT(id) as ids, COUNT(*) as cnt
         FROM patterns
-        WHERE step <= ?
         GROUP BY operator, shape
         HAVING cnt >= 2
-    """, (step,))
+    """)
 
     collision_groups = []
     for op, shape, ids_str, cnt in ec.fetchall():
@@ -334,8 +348,20 @@ def find_collisions(engine_conn, step):
     return collision_groups
 
 
-def process_collisions(engine_conn, collision_groups, step, used_tokens):
-    """Extract templates from collision groups and mint new tokens."""
+def get_known_collision_keys(engine_conn):
+    """Get the set of template+member_count keys for already-discovered collisions."""
+    ec = engine_conn.cursor()
+    ec.execute("SELECT template, member_count FROM collisions")
+    return {(row[0], row[1]) for row in ec.fetchall()}
+
+
+def process_collisions(engine_conn, collision_groups, step, used_tokens, known_keys):
+    """Extract templates from collision groups and mint new tokens.
+
+    Skips collision groups that exactly match a previously discovered
+    collision (same template, same member count). Only NEW or GROWN
+    collision groups produce new tokens.
+    """
     ec = engine_conn.cursor()
     results = []
 
@@ -347,9 +373,6 @@ def process_collisions(engine_conn, collision_groups, step, used_tokens):
         if template is None or not variables:
             continue  # no varying positions — exact duplicates, not collisions
 
-        # Mint a new token for this discovery
-        new_token = mint_token(used_tokens)
-
         # Serialize for storage
         template_json = json.dumps(template, ensure_ascii=False)
         variables_json = json.dumps(variables, ensure_ascii=False)
@@ -358,7 +381,16 @@ def process_collisions(engine_conn, collision_groups, step, used_tokens):
             ensure_ascii=False,
         )
 
-        # Build a human-readable definition
+        # Deduplication: skip if we already found this exact collision
+        collision_key = (template_json, len(triple_exprs))
+        if collision_key in known_keys:
+            continue
+        known_keys.add(collision_key)
+
+        # Mint a new token for this discovery
+        new_token = mint_token(used_tokens)
+
+        # Build definition
         definition = {
             "template": template,
             "variables": variables,
@@ -386,12 +418,14 @@ def process_collisions(engine_conn, collision_groups, step, used_tokens):
             (new_token, f"collision-{collision_id}", step),
         )
 
-        # Create derived pattern: the template becomes a new pattern for next step
+        # Create derived pattern with weight based on member count
+        # More instances = higher confidence = higher weight
+        derived_weight = min(1.0, len(triple_exprs) / 10.0)
         derived_triple = [new_token, "≡", template]
         derived_shape = compute_shape(derived_triple)
         ec.execute(
-            "INSERT INTO patterns (triple, shape, operator, step, depth, origin) VALUES (?, ?, ?, ?, ?, 'derived')",
-            (json.dumps(derived_triple, ensure_ascii=False), derived_shape, "≡", step, step + 1),
+            "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, ?, ?, 'derived', ?)",
+            (json.dumps(derived_triple, ensure_ascii=False), derived_shape, "≡", step, step + 1, derived_weight),
         )
 
         results.append({
