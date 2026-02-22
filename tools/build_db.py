@@ -1,9 +1,13 @@
 """Build ontology.db from JSONL layer files + symbols.json.
 
 Generates a SQLite database with:
-  - symbols: glyph → English name, role, layer, depth
+  - symbols: glyph → English name, role, layer, depth, opaque 6-digit token
   - triples: every triple with form classification and depth
   - refs: dependency graph (which symbols appear in which triples)
+
+Tokens are read from symbols.json (generated once via gen_tokens.py using
+cryptographic randomness). No structural information in tokens — forces
+the model to learn all structure from the relational triples alone.
 """
 
 import json
@@ -94,11 +98,15 @@ def discover_symbols(triples, label_data):
     symbols = {}
     for glyph, layer in seen.items():
         info = label_data.get(glyph, {"name": glyph, "role": "unknown"})
+        token = info.get("token", "")
+        if not token:
+            print(f"  WARNING: no token for {glyph} ({info['name']})")
         symbols[glyph] = {
             "name": info["name"],
             "role": info["role"],
             "layer": layer,
             "depth": -1,
+            "token": token,
         }
     return symbols
 
@@ -190,7 +198,8 @@ def build_database(symbols, triples):
             name TEXT NOT NULL,
             role TEXT NOT NULL,
             layer INTEGER NOT NULL,
-            depth INTEGER NOT NULL DEFAULT 0
+            depth INTEGER NOT NULL DEFAULT 0,
+            token TEXT NOT NULL UNIQUE
         );
 
         CREATE TABLE triples (
@@ -216,8 +225,8 @@ def build_database(symbols, triples):
     # Insert symbols
     for glyph, info in symbols.items():
         c.execute(
-            "INSERT INTO symbols (glyph, name, role, layer, depth) VALUES (?, ?, ?, ?, ?)",
-            (glyph, info["name"], info["role"], info["layer"], info["depth"]),
+            "INSERT INTO symbols (glyph, name, role, layer, depth, token) VALUES (?, ?, ?, ?, ?, ?)",
+            (glyph, info["name"], info["role"], info["layer"], info["depth"], info["token"]),
         )
 
     # Insert triples and refs
@@ -278,6 +287,18 @@ def print_stats(conn, symbols, triples, passes):
     print("\n=== Triple Forms ===")
     for form, count in c.fetchall():
         print(f"  {form}: {count}")
+
+    # Token stats
+    c.execute("SELECT COUNT(DISTINCT token) FROM symbols")
+    unique_tokens = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM symbols")
+    total_symbols = c.fetchone()[0]
+    print(f"\n=== Tokens ===")
+    print(f"  {unique_tokens} unique tokens for {total_symbols} symbols")
+    c.execute("SELECT glyph, name, token FROM symbols ORDER BY layer, depth LIMIT 10")
+    print("  Sample (first 10 by layer/depth):")
+    for g, n, tok in c.fetchall():
+        print(f"    {g} ({n}) → {tok}")
 
     # Unknown labels
     c.execute("SELECT glyph FROM symbols WHERE name = glyph")

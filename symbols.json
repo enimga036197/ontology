@@ -1,232 +1,1077 @@
 {
-  "⊨": {"name": "entailment", "role": "foundation"},
-  "τ": {"name": "type", "role": "foundation"},
-  "ρ": {"name": "relation", "role": "foundation"},
-  "⊤": {"name": "true", "role": "foundation"},
-  "=": {"name": "equality", "role": "foundation"},
-  "Δ": {"name": "natural", "role": "foundation"},
-  "θ": {"name": "binder", "role": "foundation"},
-  "Κ": {"name": "kind", "role": "foundation"},
-  "Τ": {"name": "type-constructor", "role": "foundation"},
-  "Ο": {"name": "operation", "role": "foundation"},
-
-  "⌂": {"name": "inhabitation", "role": "operator"},
-  "≡": {"name": "definition", "role": "operator"},
-  "↦": {"name": "type-signature", "role": "operator"},
-  "ℒ": {"name": "law", "role": "operator"},
-  "≠": {"name": "inequality", "role": "operator"},
-
-  "ϑ": {"name": "entailment-concept", "role": "concept_atom"},
-  "ς": {"name": "subject-position", "role": "structural"},
-  "ο": {"name": "object-position", "role": "structural"},
-  "π": {"name": "projection", "role": "structural"},
-  "∅": {"name": "empty", "role": "structural"},
-  "σ": {"name": "successor", "role": "operator"},
-  "⊥": {"name": "false", "role": "structural"},
-  "¬": {"name": "negation", "role": "operator"},
-  "ℑ": {"name": "identity", "role": "structural"},
-  "Σ": {"name": "sum-fold", "role": "operator"},
-  "Θ": {"name": "origin-relation", "role": "structural"},
-  "β": {"name": "origin-concept", "role": "concept_atom"},
-  "ε": {"name": "identity-concept", "role": "concept_atom"},
-  "λ": {"name": "law-concept", "role": "concept_atom"},
-  "φ": {"name": "inhabitation-concept", "role": "concept_atom"},
-  "𝟙": {"name": "unit", "role": "structural"},
-  "→": {"name": "function-type", "role": "structural"},
-  "𝒶": {"name": "var-a", "role": "variable"},
-  "∀": {"name": "universal", "role": "operator"},
-  "∃": {"name": "existential", "role": "operator"},
-
-  "Ν": {"name": "negation-concept", "role": "concept_atom"},
-  "∧": {"name": "conjunction", "role": "operator"},
-  "κ": {"name": "conjunction-concept", "role": "concept_atom"},
-  "ω": {"name": "disjunction-concept", "role": "concept_atom"},
-  "∨": {"name": "disjunction", "role": "operator"},
-  "⇒": {"name": "implication", "role": "operator"},
-  "ψ": {"name": "implication-concept", "role": "concept_atom"},
-  "⇔": {"name": "biconditional", "role": "operator"},
-  "𝒷": {"name": "var-b", "role": "variable"},
-
-  "η": {"name": "type-annotation-concept", "role": "concept_atom"},
-  "[": {"name": "tuple", "role": "structural"},
-  "μ": {"name": "function-concept", "role": "concept_atom"},
-  "𝒮": {"name": "string", "role": "type"},
-  "Ψ": {"name": "set-kind", "role": "concept_atom"},
-  "𝕊": {"name": "sequence", "role": "type"},
-  "Ω": {"name": "sequence-kind", "role": "concept_atom"},
-  "Π": {"name": "product-kind", "role": "concept_atom"},
-  "⊗": {"name": "product", "role": "structural"},
-  "++": {"name": "concatenation", "role": "operator"},
-  "Γ": {"name": "concat-concept", "role": "concept_atom"},
-
-  "Λ": {"name": "successor-concept", "role": "concept_atom"},
-  "Α": {"name": "addition-concept", "role": "concept_atom"},
-  "+": {"name": "addition", "role": "operator"},
-  "Μ": {"name": "multiplication-concept", "role": "concept_atom"},
-  "×": {"name": "multiplication", "role": "operator"},
-  "^": {"name": "exponentiation", "role": "operator"},
-  "Ε": {"name": "exponentiation-concept", "role": "concept_atom"},
-  "Φ": {"name": "less-than-concept", "role": "concept_atom"},
-  "<": {"name": "less-than", "role": "relation"},
-  ">": {"name": "greater-than", "role": "relation"},
-  "Ξ": {"name": "greater-than-concept", "role": "concept_atom"},
-  "-": {"name": "subtraction", "role": "operator"},
-  "÷": {"name": "division", "role": "operator"},
-  "Δι": {"name": "division-concept", "role": "concept_atom"},
-  "|": {"name": "divides", "role": "relation"},
-  "Δ|": {"name": "divides-concept", "role": "concept_atom"},
-  "Μο": {"name": "modulus-concept", "role": "concept_atom"},
-  "%": {"name": "modulus", "role": "operator"},
-  "𝒸": {"name": "var-c", "role": "variable"},
-
-  "χ": {"name": "membership-concept", "role": "concept_atom"},
-  "∈": {"name": "membership", "role": "relation"},
-  "∉": {"name": "non-membership", "role": "relation"},
-  "⊂": {"name": "subset", "role": "relation"},
-  "υ": {"name": "subset-concept", "role": "concept_atom"},
-  "{": {"name": "set-constructor", "role": "structural"},
-  "∪": {"name": "union", "role": "operator"},
-  "∩": {"name": "intersection", "role": "operator"},
-
-  "α": {"name": "universal-concept", "role": "concept_atom"},
-  "ξ": {"name": "existential-concept", "role": "concept_atom"},
-  "𝕧": {"name": "variable-marker", "role": "operator"},
-  "ν": {"name": "variable-concept", "role": "concept_atom"},
-  "⊳": {"name": "containment", "role": "relation"},
-  "γ": {"name": "containment-concept", "role": "concept_atom"},
-  "𝒹": {"name": "var-d", "role": "variable"},
-  "𝓀": {"name": "var-k", "role": "variable"},
-  "𝓃": {"name": "var-n", "role": "variable"},
-  "ℓ": {"name": "var-l", "role": "variable"},
-
-  "∂": {"name": "application", "role": "operator"},
-  "ℂ": {"name": "composition-concept", "role": "concept_atom"},
-  "∘": {"name": "composition", "role": "operator"},
-  "⁻": {"name": "inverse", "role": "operator"},
-  "ℐ": {"name": "inverse-concept", "role": "concept_atom"},
-  "⟷": {"name": "invertible", "role": "relation"},
-
-  "Ⓢ": {"name": "statement", "role": "type"},
-  "Ⓡ": {"name": "result", "role": "type"},
-  "Ⓒ": {"name": "computation", "role": "type"},
-  "⊕": {"name": "success", "role": "structural"},
-  "⊖": {"name": "failure", "role": "structural"},
-  "□": {"name": "obligation", "role": "structural"},
-  "◊": {"name": "permission", "role": "structural"},
-  "✓": {"name": "yes", "role": "structural"},
-  "✗": {"name": "no", "role": "structural"},
-  "!": {"name": "assertion", "role": "operator"},
-  "?": {"name": "query", "role": "operator"},
-
-  "𝔻": {"name": "digit-set", "role": "type"},
-  "0": {"name": "digit-0", "role": "digit"},
-  "1": {"name": "digit-1", "role": "digit"},
-  "2": {"name": "digit-2", "role": "digit"},
-  "3": {"name": "digit-3", "role": "digit"},
-  "4": {"name": "digit-4", "role": "digit"},
-  "5": {"name": "digit-5", "role": "digit"},
-  "6": {"name": "digit-6", "role": "digit"},
-  "7": {"name": "digit-7", "role": "digit"},
-  "8": {"name": "digit-8", "role": "digit"},
-  "9": {"name": "digit-9", "role": "digit"},
-  "Κℛ": {"name": "reading-concept", "role": "concept_atom"},
-  "ℛ": {"name": "reading", "role": "operator"},
-  "ℛ⁻¹": {"name": "reading-inverse", "role": "operator"},
-  "Κℛ⁻¹": {"name": "reading-inverse-concept", "role": "concept_atom"},
-  "Ϛ": {"name": "digit-successor", "role": "operator"},
-  "ΚϚ": {"name": "digit-successor-concept", "role": "concept_atom"},
-  "Κℛₘ": {"name": "positional-reading-concept", "role": "concept_atom"},
-  "ℛₘ": {"name": "positional-reading", "role": "operator"},
-  "⦃": {"name": "seq-open", "role": "structural"},
-  "⦄": {"name": "seq-close", "role": "structural"},
-  "init": {"name": "all-but-last", "role": "operator"},
-  "lst": {"name": "last-element", "role": "operator"},
-
-  "𝔹": {"name": "boolean", "role": "type"},
-  "⊻": {"name": "xor", "role": "operator"},
-  "≪": {"name": "left-shift", "role": "operator"},
-  "≫": {"name": "right-shift", "role": "operator"},
-  "𝔅": {"name": "bit-test", "role": "relation"},
-  "𝔅⁻¹": {"name": "bit-set", "role": "operator"},
-  "⊙": {"name": "bitwise-and", "role": "operator"},
-
-  "⊏": {"name": "domain", "role": "operator"},
-  "𝓛": {"name": "logic-domain", "role": "kind"},
-  "𝓐": {"name": "arithmetic-domain", "role": "kind"},
-  "𝓕": {"name": "variable-domain", "role": "kind"},
-  "𝓢": {"name": "set-domain", "role": "kind"},
-  "𝓑": {"name": "bitwise-domain", "role": "kind"},
-  "𝓡": {"name": "numeral-domain", "role": "kind"},
-  "⋔": {"name": "associates", "role": "operator"},
-
-  "≅": {"name": "congruence", "role": "relation"},
-  "Κ≅": {"name": "congruence-concept", "role": "concept_atom"},
-  "Κgcd": {"name": "gcd-concept", "role": "concept_atom"},
-  "gcd": {"name": "greatest-common-divisor", "role": "operator"},
-  "lcm": {"name": "least-common-multiple", "role": "operator"},
-  "Κlcm": {"name": "lcm-concept", "role": "concept_atom"},
-  "Κ𝕄": {"name": "modular-type-concept", "role": "concept_atom"},
-  "𝕄": {"name": "modular-type", "role": "type"},
-  "Κ⊘": {"name": "modular-quotient-concept", "role": "concept_atom"},
-  "⊘": {"name": "modular-quotient", "role": "operator"},
-  "Κϕ": {"name": "totient-concept", "role": "concept_atom"},
-  "ϕ": {"name": "totient", "role": "operator"},
-  "ℙ": {"name": "prime", "role": "relation"},
-  "Κℙ": {"name": "prime-concept", "role": "concept_atom"},
-  "Κ⟂": {"name": "coprime-concept", "role": "concept_atom"},
-  "⟂": {"name": "coprime", "role": "relation"},
-
-  "#": {"name": "length", "role": "operator"},
-  "Κ#": {"name": "length-concept", "role": "concept_atom"},
-  "Κ@": {"name": "index-concept", "role": "concept_atom"},
-  "@": {"name": "index", "role": "operator"},
-  "Κhd": {"name": "head-concept", "role": "concept_atom"},
-  "hd": {"name": "head", "role": "operator"},
-  "tl": {"name": "tail", "role": "operator"},
-  "Κtl": {"name": "tail-concept", "role": "concept_atom"},
-  "Κlst": {"name": "last-concept", "role": "concept_atom"},
-  "Κinit": {"name": "init-concept", "role": "concept_atom"},
-  "Κ∑": {"name": "sum-concept", "role": "concept_atom"},
-  "∑": {"name": "sum", "role": "operator"},
-  "∏": {"name": "product-seq", "role": "operator"},
-  "Κ∏": {"name": "product-seq-concept", "role": "concept_atom"},
-  "Aₛ": {"name": "arithmetic-seq", "role": "operator"},
-  "ΚAₛ": {"name": "arithmetic-seq-concept", "role": "concept_atom"},
-  "Gₛ": {"name": "geometric-seq", "role": "operator"},
-  "ΚGₛ": {"name": "geometric-seq-concept", "role": "concept_atom"},
-  "ΚFₛ": {"name": "fibonacci-concept", "role": "concept_atom"},
-  "Fₛ": {"name": "fibonacci", "role": "operator"},
-  "Κmap": {"name": "map-concept", "role": "concept_atom"},
-  "map": {"name": "map-each", "role": "operator"},
-  "filter": {"name": "filter-by", "role": "operator"},
-  "Κfilter": {"name": "filter-concept", "role": "concept_atom"},
-  "fold": {"name": "fold-reduce", "role": "operator"},
-  "Κfold": {"name": "fold-concept", "role": "concept_atom"},
-  "Κrng": {"name": "range-concept", "role": "concept_atom"},
-  "rng": {"name": "range", "role": "operator"},
-  "rev": {"name": "reverse", "role": "operator"},
-  "Κrev": {"name": "reverse-concept", "role": "concept_atom"},
-  "take": {"name": "take-prefix", "role": "operator"},
-  "Κtake": {"name": "take-concept", "role": "concept_atom"},
-  "drop": {"name": "drop-prefix", "role": "operator"},
-  "Κdrop": {"name": "drop-concept", "role": "concept_atom"},
-
-  "Magma": {"name": "magma", "role": "type"},
-  "Semigroup": {"name": "semigroup", "role": "type"},
-  "Monoid": {"name": "monoid", "role": "type"},
-  "Group": {"name": "group", "role": "type"},
-  "Abelian": {"name": "abelian-group", "role": "type"},
-  "closes": {"name": "closure", "role": "relation"},
-  "assoc": {"name": "associativity", "role": "relation"},
-  "hasId": {"name": "has-identity", "role": "relation"},
-  "hasInv": {"name": "has-inverse", "role": "relation"},
-  "commut": {"name": "commutativity", "role": "relation"},
-  "distrib": {"name": "distributivity", "role": "relation"},
-  "Semiring": {"name": "semiring", "role": "type"},
-  "Perm": {"name": "permutation", "role": "type"},
-  "Sym": {"name": "symmetric-group", "role": "type"},
-  "≥": {"name": "greater-equal", "role": "relation"},
-  "◦": {"name": "group-operation", "role": "operator"},
-  "Hom": {"name": "homomorphism", "role": "operator"},
-  "≃": {"name": "isomorphism", "role": "relation"}
+  "⊨": {
+    "name": "entailment",
+    "role": "foundation",
+    "token": "618371"
+  },
+  "τ": {
+    "name": "type",
+    "role": "foundation",
+    "token": "415161"
+  },
+  "ρ": {
+    "name": "relation",
+    "role": "foundation",
+    "token": "892118"
+  },
+  "⊤": {
+    "name": "true",
+    "role": "foundation",
+    "token": "417247"
+  },
+  "=": {
+    "name": "equality",
+    "role": "foundation",
+    "token": "963273"
+  },
+  "Δ": {
+    "name": "natural",
+    "role": "foundation",
+    "token": "523476"
+  },
+  "θ": {
+    "name": "binder",
+    "role": "foundation",
+    "token": "952848"
+  },
+  "Κ": {
+    "name": "kind",
+    "role": "foundation",
+    "token": "968514"
+  },
+  "Τ": {
+    "name": "type-constructor",
+    "role": "foundation",
+    "token": "481865"
+  },
+  "Ο": {
+    "name": "operation",
+    "role": "foundation",
+    "token": "458373"
+  },
+  "⌂": {
+    "name": "inhabitation",
+    "role": "operator",
+    "token": "295717"
+  },
+  "≡": {
+    "name": "definition",
+    "role": "operator",
+    "token": "529891"
+  },
+  "↦": {
+    "name": "type-signature",
+    "role": "operator",
+    "token": "795859"
+  },
+  "ℒ": {
+    "name": "law",
+    "role": "operator",
+    "token": "233822"
+  },
+  "≠": {
+    "name": "inequality",
+    "role": "operator",
+    "token": "196152"
+  },
+  "ϑ": {
+    "name": "entailment-concept",
+    "role": "concept_atom",
+    "token": "975538"
+  },
+  "ς": {
+    "name": "subject-position",
+    "role": "structural",
+    "token": "594675"
+  },
+  "ο": {
+    "name": "object-position",
+    "role": "structural",
+    "token": "287925"
+  },
+  "π": {
+    "name": "projection",
+    "role": "structural",
+    "token": "262699"
+  },
+  "∅": {
+    "name": "empty",
+    "role": "structural",
+    "token": "137746"
+  },
+  "σ": {
+    "name": "successor",
+    "role": "operator",
+    "token": "772215"
+  },
+  "⊥": {
+    "name": "false",
+    "role": "structural",
+    "token": "266649"
+  },
+  "¬": {
+    "name": "negation",
+    "role": "operator",
+    "token": "658759"
+  },
+  "ℑ": {
+    "name": "identity",
+    "role": "structural",
+    "token": "847978"
+  },
+  "Σ": {
+    "name": "sum-fold",
+    "role": "operator",
+    "token": "757456"
+  },
+  "Θ": {
+    "name": "origin-relation",
+    "role": "structural",
+    "token": "312499"
+  },
+  "β": {
+    "name": "origin-concept",
+    "role": "concept_atom",
+    "token": "587868"
+  },
+  "ε": {
+    "name": "identity-concept",
+    "role": "concept_atom",
+    "token": "125215"
+  },
+  "λ": {
+    "name": "law-concept",
+    "role": "concept_atom",
+    "token": "716669"
+  },
+  "φ": {
+    "name": "inhabitation-concept",
+    "role": "concept_atom",
+    "token": "848332"
+  },
+  "𝟙": {
+    "name": "unit",
+    "role": "structural",
+    "token": "986789"
+  },
+  "→": {
+    "name": "function-type",
+    "role": "structural",
+    "token": "288845"
+  },
+  "𝒶": {
+    "name": "var-a",
+    "role": "variable",
+    "token": "215261"
+  },
+  "∀": {
+    "name": "universal",
+    "role": "operator",
+    "token": "827237"
+  },
+  "∃": {
+    "name": "existential",
+    "role": "operator",
+    "token": "916863"
+  },
+  "Ν": {
+    "name": "negation-concept",
+    "role": "concept_atom",
+    "token": "238463"
+  },
+  "∧": {
+    "name": "conjunction",
+    "role": "operator",
+    "token": "384866"
+  },
+  "κ": {
+    "name": "conjunction-concept",
+    "role": "concept_atom",
+    "token": "395633"
+  },
+  "ω": {
+    "name": "disjunction-concept",
+    "role": "concept_atom",
+    "token": "622521"
+  },
+  "∨": {
+    "name": "disjunction",
+    "role": "operator",
+    "token": "135486"
+  },
+  "⇒": {
+    "name": "implication",
+    "role": "operator",
+    "token": "183346"
+  },
+  "ψ": {
+    "name": "implication-concept",
+    "role": "concept_atom",
+    "token": "751849"
+  },
+  "⇔": {
+    "name": "biconditional",
+    "role": "operator",
+    "token": "571772"
+  },
+  "𝒷": {
+    "name": "var-b",
+    "role": "variable",
+    "token": "177626"
+  },
+  "η": {
+    "name": "type-annotation-concept",
+    "role": "concept_atom",
+    "token": "822914"
+  },
+  "[": {
+    "name": "tuple",
+    "role": "structural",
+    "token": "134881"
+  },
+  "μ": {
+    "name": "function-concept",
+    "role": "concept_atom",
+    "token": "751155"
+  },
+  "𝒮": {
+    "name": "string",
+    "role": "type",
+    "token": "566816"
+  },
+  "Ψ": {
+    "name": "set-kind",
+    "role": "concept_atom",
+    "token": "717784"
+  },
+  "𝕊": {
+    "name": "sequence",
+    "role": "type",
+    "token": "183893"
+  },
+  "Ω": {
+    "name": "sequence-kind",
+    "role": "concept_atom",
+    "token": "991224"
+  },
+  "Π": {
+    "name": "product-kind",
+    "role": "concept_atom",
+    "token": "212763"
+  },
+  "⊗": {
+    "name": "product",
+    "role": "structural",
+    "token": "139241"
+  },
+  "++": {
+    "name": "concatenation",
+    "role": "operator",
+    "token": "773954"
+  },
+  "Γ": {
+    "name": "concat-concept",
+    "role": "concept_atom",
+    "token": "875747"
+  },
+  "Λ": {
+    "name": "successor-concept",
+    "role": "concept_atom",
+    "token": "793479"
+  },
+  "Α": {
+    "name": "addition-concept",
+    "role": "concept_atom",
+    "token": "923723"
+  },
+  "+": {
+    "name": "addition",
+    "role": "operator",
+    "token": "663599"
+  },
+  "Μ": {
+    "name": "multiplication-concept",
+    "role": "concept_atom",
+    "token": "966767"
+  },
+  "×": {
+    "name": "multiplication",
+    "role": "operator",
+    "token": "493156"
+  },
+  "^": {
+    "name": "exponentiation",
+    "role": "operator",
+    "token": "927999"
+  },
+  "Ε": {
+    "name": "exponentiation-concept",
+    "role": "concept_atom",
+    "token": "219595"
+  },
+  "Φ": {
+    "name": "less-than-concept",
+    "role": "concept_atom",
+    "token": "954496"
+  },
+  "<": {
+    "name": "less-than",
+    "role": "relation",
+    "token": "839229"
+  },
+  ">": {
+    "name": "greater-than",
+    "role": "relation",
+    "token": "413373"
+  },
+  "Ξ": {
+    "name": "greater-than-concept",
+    "role": "concept_atom",
+    "token": "732855"
+  },
+  "-": {
+    "name": "subtraction",
+    "role": "operator",
+    "token": "438467"
+  },
+  "÷": {
+    "name": "division",
+    "role": "operator",
+    "token": "498145"
+  },
+  "Δι": {
+    "name": "division-concept",
+    "role": "concept_atom",
+    "token": "571885"
+  },
+  "|": {
+    "name": "divides",
+    "role": "relation",
+    "token": "937961"
+  },
+  "Δ|": {
+    "name": "divides-concept",
+    "role": "concept_atom",
+    "token": "478463"
+  },
+  "Μο": {
+    "name": "modulus-concept",
+    "role": "concept_atom",
+    "token": "393558"
+  },
+  "%": {
+    "name": "modulus",
+    "role": "operator",
+    "token": "511564"
+  },
+  "𝒸": {
+    "name": "var-c",
+    "role": "variable",
+    "token": "181114"
+  },
+  "χ": {
+    "name": "membership-concept",
+    "role": "concept_atom",
+    "token": "477229"
+  },
+  "∈": {
+    "name": "membership",
+    "role": "relation",
+    "token": "535347"
+  },
+  "∉": {
+    "name": "non-membership",
+    "role": "relation",
+    "token": "785338"
+  },
+  "⊂": {
+    "name": "subset",
+    "role": "relation",
+    "token": "455347"
+  },
+  "υ": {
+    "name": "subset-concept",
+    "role": "concept_atom",
+    "token": "397332"
+  },
+  "{": {
+    "name": "set-constructor",
+    "role": "structural",
+    "token": "653525"
+  },
+  "∪": {
+    "name": "union",
+    "role": "operator",
+    "token": "732226"
+  },
+  "∩": {
+    "name": "intersection",
+    "role": "operator",
+    "token": "421695"
+  },
+  "α": {
+    "name": "universal-concept",
+    "role": "concept_atom",
+    "token": "836746"
+  },
+  "ξ": {
+    "name": "existential-concept",
+    "role": "concept_atom",
+    "token": "682792"
+  },
+  "𝕧": {
+    "name": "variable-marker",
+    "role": "operator",
+    "token": "531812"
+  },
+  "ν": {
+    "name": "variable-concept",
+    "role": "concept_atom",
+    "token": "542831"
+  },
+  "⊳": {
+    "name": "containment",
+    "role": "relation",
+    "token": "572147"
+  },
+  "γ": {
+    "name": "containment-concept",
+    "role": "concept_atom",
+    "token": "856867"
+  },
+  "𝒹": {
+    "name": "var-d",
+    "role": "variable",
+    "token": "283418"
+  },
+  "𝓀": {
+    "name": "var-k",
+    "role": "variable",
+    "token": "588467"
+  },
+  "𝓃": {
+    "name": "var-n",
+    "role": "variable",
+    "token": "939462"
+  },
+  "ℓ": {
+    "name": "var-l",
+    "role": "variable",
+    "token": "381833"
+  },
+  "∂": {
+    "name": "application",
+    "role": "operator",
+    "token": "227613"
+  },
+  "ℂ": {
+    "name": "composition-concept",
+    "role": "concept_atom",
+    "token": "353285"
+  },
+  "∘": {
+    "name": "composition",
+    "role": "operator",
+    "token": "641176"
+  },
+  "⁻": {
+    "name": "inverse",
+    "role": "operator",
+    "token": "665944"
+  },
+  "ℐ": {
+    "name": "inverse-concept",
+    "role": "concept_atom",
+    "token": "915187"
+  },
+  "⟷": {
+    "name": "invertible",
+    "role": "relation",
+    "token": "581941"
+  },
+  "Ⓢ": {
+    "name": "statement",
+    "role": "type",
+    "token": "165799"
+  },
+  "Ⓡ": {
+    "name": "result",
+    "role": "type",
+    "token": "728117"
+  },
+  "Ⓒ": {
+    "name": "computation",
+    "role": "type",
+    "token": "768559"
+  },
+  "⊕": {
+    "name": "success",
+    "role": "structural",
+    "token": "266155"
+  },
+  "⊖": {
+    "name": "failure",
+    "role": "structural",
+    "token": "868878"
+  },
+  "□": {
+    "name": "obligation",
+    "role": "structural",
+    "token": "684925"
+  },
+  "◊": {
+    "name": "permission",
+    "role": "structural",
+    "token": "132522"
+  },
+  "✓": {
+    "name": "yes",
+    "role": "structural",
+    "token": "454882"
+  },
+  "✗": {
+    "name": "no",
+    "role": "structural",
+    "token": "258445"
+  },
+  "!": {
+    "name": "assertion",
+    "role": "operator",
+    "token": "433716"
+  },
+  "?": {
+    "name": "query",
+    "role": "operator",
+    "token": "457635"
+  },
+  "𝔻": {
+    "name": "digit-set",
+    "role": "type",
+    "token": "377172"
+  },
+  "0": {
+    "name": "digit-0",
+    "role": "digit",
+    "token": "976626"
+  },
+  "1": {
+    "name": "digit-1",
+    "role": "digit",
+    "token": "256555"
+  },
+  "2": {
+    "name": "digit-2",
+    "role": "digit",
+    "token": "183357"
+  },
+  "3": {
+    "name": "digit-3",
+    "role": "digit",
+    "token": "524272"
+  },
+  "4": {
+    "name": "digit-4",
+    "role": "digit",
+    "token": "241743"
+  },
+  "5": {
+    "name": "digit-5",
+    "role": "digit",
+    "token": "425961"
+  },
+  "6": {
+    "name": "digit-6",
+    "role": "digit",
+    "token": "842691"
+  },
+  "7": {
+    "name": "digit-7",
+    "role": "digit",
+    "token": "263374"
+  },
+  "8": {
+    "name": "digit-8",
+    "role": "digit",
+    "token": "725431"
+  },
+  "9": {
+    "name": "digit-9",
+    "role": "digit",
+    "token": "633782"
+  },
+  "Κℛ": {
+    "name": "reading-concept",
+    "role": "concept_atom",
+    "token": "863247"
+  },
+  "ℛ": {
+    "name": "reading",
+    "role": "operator",
+    "token": "359473"
+  },
+  "ℛ⁻¹": {
+    "name": "reading-inverse",
+    "role": "operator",
+    "token": "815939"
+  },
+  "Κℛ⁻¹": {
+    "name": "reading-inverse-concept",
+    "role": "concept_atom",
+    "token": "954457"
+  },
+  "Ϛ": {
+    "name": "digit-successor",
+    "role": "operator",
+    "token": "871441"
+  },
+  "ΚϚ": {
+    "name": "digit-successor-concept",
+    "role": "concept_atom",
+    "token": "961718"
+  },
+  "Κℛₘ": {
+    "name": "positional-reading-concept",
+    "role": "concept_atom",
+    "token": "935374"
+  },
+  "ℛₘ": {
+    "name": "positional-reading",
+    "role": "operator",
+    "token": "411722"
+  },
+  "⦃": {
+    "name": "seq-open",
+    "role": "structural",
+    "token": "449277"
+  },
+  "⦄": {
+    "name": "seq-close",
+    "role": "structural",
+    "token": "313657"
+  },
+  "init": {
+    "name": "all-but-last",
+    "role": "operator",
+    "token": "922745"
+  },
+  "lst": {
+    "name": "last-element",
+    "role": "operator",
+    "token": "774712"
+  },
+  "𝔹": {
+    "name": "boolean",
+    "role": "type",
+    "token": "822265"
+  },
+  "⊻": {
+    "name": "xor",
+    "role": "operator",
+    "token": "852973"
+  },
+  "≪": {
+    "name": "left-shift",
+    "role": "operator",
+    "token": "245464"
+  },
+  "≫": {
+    "name": "right-shift",
+    "role": "operator",
+    "token": "135968"
+  },
+  "𝔅": {
+    "name": "bit-test",
+    "role": "relation",
+    "token": "772323"
+  },
+  "𝔅⁻¹": {
+    "name": "bit-set",
+    "role": "operator",
+    "token": "181216"
+  },
+  "⊙": {
+    "name": "bitwise-and",
+    "role": "operator",
+    "token": "316623"
+  },
+  "⊏": {
+    "name": "domain",
+    "role": "operator",
+    "token": "452547"
+  },
+  "𝓛": {
+    "name": "logic-domain",
+    "role": "kind",
+    "token": "658456"
+  },
+  "𝓐": {
+    "name": "arithmetic-domain",
+    "role": "kind",
+    "token": "511344"
+  },
+  "𝓕": {
+    "name": "variable-domain",
+    "role": "kind",
+    "token": "388444"
+  },
+  "𝓢": {
+    "name": "set-domain",
+    "role": "kind",
+    "token": "373556"
+  },
+  "𝓑": {
+    "name": "bitwise-domain",
+    "role": "kind",
+    "token": "869437"
+  },
+  "𝓡": {
+    "name": "numeral-domain",
+    "role": "kind",
+    "token": "778733"
+  },
+  "⋔": {
+    "name": "associates",
+    "role": "operator",
+    "token": "738324"
+  },
+  "≅": {
+    "name": "congruence",
+    "role": "relation",
+    "token": "538595"
+  },
+  "Κ≅": {
+    "name": "congruence-concept",
+    "role": "concept_atom",
+    "token": "972779"
+  },
+  "Κgcd": {
+    "name": "gcd-concept",
+    "role": "concept_atom",
+    "token": "556896"
+  },
+  "gcd": {
+    "name": "greatest-common-divisor",
+    "role": "operator",
+    "token": "376415"
+  },
+  "lcm": {
+    "name": "least-common-multiple",
+    "role": "operator",
+    "token": "363148"
+  },
+  "Κlcm": {
+    "name": "lcm-concept",
+    "role": "concept_atom",
+    "token": "765217"
+  },
+  "Κ𝕄": {
+    "name": "modular-type-concept",
+    "role": "concept_atom",
+    "token": "656646"
+  },
+  "𝕄": {
+    "name": "modular-type",
+    "role": "type",
+    "token": "919427"
+  },
+  "Κ⊘": {
+    "name": "modular-quotient-concept",
+    "role": "concept_atom",
+    "token": "772811"
+  },
+  "⊘": {
+    "name": "modular-quotient",
+    "role": "operator",
+    "token": "257183"
+  },
+  "Κϕ": {
+    "name": "totient-concept",
+    "role": "concept_atom",
+    "token": "228294"
+  },
+  "ϕ": {
+    "name": "totient",
+    "role": "operator",
+    "token": "418189"
+  },
+  "ℙ": {
+    "name": "prime",
+    "role": "relation",
+    "token": "775943"
+  },
+  "Κℙ": {
+    "name": "prime-concept",
+    "role": "concept_atom",
+    "token": "569834"
+  },
+  "Κ⟂": {
+    "name": "coprime-concept",
+    "role": "concept_atom",
+    "token": "364179"
+  },
+  "⟂": {
+    "name": "coprime",
+    "role": "relation",
+    "token": "622176"
+  },
+  "#": {
+    "name": "length",
+    "role": "operator",
+    "token": "698254"
+  },
+  "Κ#": {
+    "name": "length-concept",
+    "role": "concept_atom",
+    "token": "798573"
+  },
+  "Κ@": {
+    "name": "index-concept",
+    "role": "concept_atom",
+    "token": "698636"
+  },
+  "@": {
+    "name": "index",
+    "role": "operator",
+    "token": "858665"
+  },
+  "Κhd": {
+    "name": "head-concept",
+    "role": "concept_atom",
+    "token": "647298"
+  },
+  "hd": {
+    "name": "head",
+    "role": "operator",
+    "token": "986514"
+  },
+  "tl": {
+    "name": "tail",
+    "role": "operator",
+    "token": "546521"
+  },
+  "Κtl": {
+    "name": "tail-concept",
+    "role": "concept_atom",
+    "token": "892584"
+  },
+  "Κlst": {
+    "name": "last-concept",
+    "role": "concept_atom",
+    "token": "186659"
+  },
+  "Κinit": {
+    "name": "init-concept",
+    "role": "concept_atom",
+    "token": "573584"
+  },
+  "Κ∑": {
+    "name": "sum-concept",
+    "role": "concept_atom",
+    "token": "813491"
+  },
+  "∑": {
+    "name": "sum",
+    "role": "operator",
+    "token": "748419"
+  },
+  "∏": {
+    "name": "product-seq",
+    "role": "operator",
+    "token": "413388"
+  },
+  "Κ∏": {
+    "name": "product-seq-concept",
+    "role": "concept_atom",
+    "token": "521263"
+  },
+  "Aₛ": {
+    "name": "arithmetic-seq",
+    "role": "operator",
+    "token": "541784"
+  },
+  "ΚAₛ": {
+    "name": "arithmetic-seq-concept",
+    "role": "concept_atom",
+    "token": "298253"
+  },
+  "Gₛ": {
+    "name": "geometric-seq",
+    "role": "operator",
+    "token": "943736"
+  },
+  "ΚGₛ": {
+    "name": "geometric-seq-concept",
+    "role": "concept_atom",
+    "token": "371396"
+  },
+  "ΚFₛ": {
+    "name": "fibonacci-concept",
+    "role": "concept_atom",
+    "token": "997741"
+  },
+  "Fₛ": {
+    "name": "fibonacci",
+    "role": "operator",
+    "token": "625485"
+  },
+  "Κmap": {
+    "name": "map-concept",
+    "role": "concept_atom",
+    "token": "221396"
+  },
+  "map": {
+    "name": "map-each",
+    "role": "operator",
+    "token": "542373"
+  },
+  "filter": {
+    "name": "filter-by",
+    "role": "operator",
+    "token": "536749"
+  },
+  "Κfilter": {
+    "name": "filter-concept",
+    "role": "concept_atom",
+    "token": "267536"
+  },
+  "fold": {
+    "name": "fold-reduce",
+    "role": "operator",
+    "token": "734478"
+  },
+  "Κfold": {
+    "name": "fold-concept",
+    "role": "concept_atom",
+    "token": "412584"
+  },
+  "Κrng": {
+    "name": "range-concept",
+    "role": "concept_atom",
+    "token": "556454"
+  },
+  "rng": {
+    "name": "range",
+    "role": "operator",
+    "token": "554346"
+  },
+  "rev": {
+    "name": "reverse",
+    "role": "operator",
+    "token": "938785"
+  },
+  "Κrev": {
+    "name": "reverse-concept",
+    "role": "concept_atom",
+    "token": "998832"
+  },
+  "take": {
+    "name": "take-prefix",
+    "role": "operator",
+    "token": "851378"
+  },
+  "Κtake": {
+    "name": "take-concept",
+    "role": "concept_atom",
+    "token": "265845"
+  },
+  "drop": {
+    "name": "drop-prefix",
+    "role": "operator",
+    "token": "467632"
+  },
+  "Κdrop": {
+    "name": "drop-concept",
+    "role": "concept_atom",
+    "token": "751119"
+  },
+  "Magma": {
+    "name": "magma",
+    "role": "type",
+    "token": "977622"
+  },
+  "Semigroup": {
+    "name": "semigroup",
+    "role": "type",
+    "token": "115115"
+  },
+  "Monoid": {
+    "name": "monoid",
+    "role": "type",
+    "token": "865822"
+  },
+  "Group": {
+    "name": "group",
+    "role": "type",
+    "token": "885943"
+  },
+  "Abelian": {
+    "name": "abelian-group",
+    "role": "type",
+    "token": "828564"
+  },
+  "closes": {
+    "name": "closure",
+    "role": "relation",
+    "token": "486887"
+  },
+  "assoc": {
+    "name": "associativity",
+    "role": "relation",
+    "token": "134287"
+  },
+  "hasId": {
+    "name": "has-identity",
+    "role": "relation",
+    "token": "213119"
+  },
+  "hasInv": {
+    "name": "has-inverse",
+    "role": "relation",
+    "token": "746667"
+  },
+  "commut": {
+    "name": "commutativity",
+    "role": "relation",
+    "token": "899119"
+  },
+  "distrib": {
+    "name": "distributivity",
+    "role": "relation",
+    "token": "863747"
+  },
+  "Semiring": {
+    "name": "semiring",
+    "role": "type",
+    "token": "666365"
+  },
+  "Perm": {
+    "name": "permutation",
+    "role": "type",
+    "token": "679131"
+  },
+  "Sym": {
+    "name": "symmetric-group",
+    "role": "type",
+    "token": "617424"
+  },
+  "≥": {
+    "name": "greater-equal",
+    "role": "relation",
+    "token": "397566"
+  },
+  "◦": {
+    "name": "group-operation",
+    "role": "operator",
+    "token": "183577"
+  },
+  "Hom": {
+    "name": "homomorphism",
+    "role": "operator",
+    "token": "769361"
+  },
+  "≃": {
+    "name": "isomorphism",
+    "role": "relation",
+    "token": "988917"
+  }
 }
