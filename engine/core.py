@@ -1,12 +1,19 @@
 """Collision engine: structural pattern discovery via database operations.
 
-The database IS the model. Ingestion is training. Structural collision is
-inference. Compounding tokenization is learning.
+The database IS the model. State is save, save is state.
 
 No VRAM, no gradients, no tokenizer. Patterns are stored as token-triples
 in SQLite. Collisions — where multiple triples share structural form but
 differ in specific tokens — are the engine's discoveries. Each discovery
 gets a new opaque token and is fed back for the next step.
+
+Hash collision mechanism: for each pattern, generate every possible template
+by wildcarding each subset of leaf positions (up to max_wildcards deep).
+Two patterns that produce the same template ARE a collision — a structural
+similarity the engine discovers without being told what to look for.
+
+All intermediate state (templates, collisions, patterns) lives in SQL.
+Python holds at most one collision group at a time. No OOM regardless of scale.
 """
 
 import json
@@ -15,6 +22,7 @@ import secrets
 import os
 import sys
 import io
+from itertools import combinations
 
 if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
@@ -45,12 +53,6 @@ def compute_shape(expr):
     """Compute the structural shape of a token expression.
 
     Replaces every leaf token with '_', preserving tree structure.
-    Returns a canonical string for grouping.
-
-    Examples:
-        "618371"                    → "_"
-        ["618371", "417247"]        → "[_,_]"
-        ["618371", ["417247", "X"]] → "[_,[_,_]]"
     """
     if isinstance(expr, str):
         return "_"
@@ -61,11 +63,7 @@ def compute_shape(expr):
 
 
 def flatten_positions(expr, path=()):
-    """Yield (path_tuple, token) for every leaf in the expression tree.
-
-    Path encodes position: (0,) is first element, (2, 1) is second element
-    inside the third element, etc.
-    """
+    """Yield (path_tuple, token) for every leaf in the expression tree."""
     if isinstance(expr, str):
         yield (path, expr)
     elif isinstance(expr, list):
@@ -73,103 +71,52 @@ def flatten_positions(expr, path=()):
             yield from flatten_positions(item, path + (i,))
 
 
-def rebuild_from_positions(shape_expr, position_map):
-    """Rebuild an expression from a shape template and position→value map."""
-    if isinstance(shape_expr, str):
-        return shape_expr
-    if isinstance(shape_expr, list):
-        return [rebuild_from_positions(e, position_map) for e in shape_expr]
+def rebuild_with_path_map(expr, path_map, path=()):
+    """Rebuild an expression tree, replacing leaf values per path->value map."""
+    if isinstance(expr, str):
+        return path_map.get(path, expr)
+    if isinstance(expr, list):
+        return [rebuild_with_path_map(e, path_map, path + (i,)) for i, e in enumerate(expr)]
+    return expr
 
 
 # ---------------------------------------------------------------------------
-# Template extraction
+# Template generation
 # ---------------------------------------------------------------------------
 
-def extract_template(triples_token_exprs):
-    """Given a list of token-space triples that share structure, extract
-    the shared template with co-varying wildcard positions.
+def generate_templates_for_pattern(expr, max_wildcards=3):
+    """Generate wildcard templates from a token expression.
 
-    Returns (template, variables) where:
-        template: the expression with _N wildcards
-        variables: {wildcard: [values across instances]}
-        bindings: {wildcard: set of positions it appears in}
+    Yields (template_json_str, wildcard_values_json_str) tuples.
+    Polynomial complexity: O(N^max_wildcards) per pattern.
     """
-    if not triples_token_exprs:
-        return None, None, None
+    positions = list(flatten_positions(expr))
+    n = len(positions)
 
-    # Get all position→token maps
-    all_positions = []
-    for expr in triples_token_exprs:
-        pos_map = dict(flatten_positions(expr))
-        all_positions.append(pos_map)
+    if n < 2:
+        return
 
-    # Get the union of all positions (should be identical since same shape)
-    positions = sorted(all_positions[0].keys())
+    max_w = min(max_wildcards, n - 1)
 
-    # For each position, collect the set of values across all triples
-    pos_values = {}
-    for pos in positions:
-        vals = tuple(pm.get(pos, "") for pm in all_positions)
-        pos_values[pos] = vals
+    for num_wild in range(1, max_w + 1):
+        for wild_indices in combinations(range(n), num_wild):
+            wild_set = set(wild_indices)
+            path_map = {}
+            wild_vals = {}
+            wild_idx = 0
 
-    # Classify each position: CONSTANT (same value everywhere) or VARYING
-    constants = {}  # pos → token
-    varying = {}    # pos → tuple of values
+            for i, (path, token) in enumerate(positions):
+                if i in wild_set:
+                    wname = f"_{wild_idx}"
+                    path_map[path] = wname
+                    wild_vals[wname] = token
+                    wild_idx += 1
+                else:
+                    path_map[path] = token
 
-    for pos, vals in pos_values.items():
-        if len(set(vals)) == 1:
-            constants[pos] = vals[0]
-        else:
-            varying[pos] = vals
-
-    # Detect co-varying positions: positions that always have the same token
-    # as each other across all instances
-    covar_groups = []
-    varying_positions = list(varying.keys())
-    assigned = set()
-
-    for i, pos_a in enumerate(varying_positions):
-        if pos_a in assigned:
-            continue
-        group = [pos_a]
-        assigned.add(pos_a)
-        for pos_b in varying_positions[i + 1:]:
-            if pos_b in assigned:
-                continue
-            if varying[pos_a] == varying[pos_b]:
-                group.append(pos_b)
-                assigned.add(pos_b)
-        covar_groups.append(group)
-
-    # Assign wildcard names
-    wildcard_map = {}  # pos → wildcard name
-    variables = {}     # wildcard name → list of values
-    bindings = {}      # wildcard name → set of positions
-
-    for idx, group in enumerate(covar_groups):
-        name = f"_{idx}"
-        for pos in group:
-            wildcard_map[pos] = name
-        variables[name] = list(varying[group[0]])
-        bindings[name] = set(group)
-
-    # Build the template expression
-    def build_template(expr, path=()):
-        if isinstance(expr, str):
-            if path in constants:
-                return constants[path]
-            elif path in wildcard_map:
-                return wildcard_map[path]
-            else:
-                return expr
-        elif isinstance(expr, list):
-            return [build_template(e, path + (i,)) for i, e in enumerate(expr)]
-        return expr
-
-    # Use the first triple as the structural scaffold
-    template = build_template(triples_token_exprs[0])
-
-    return template, variables, bindings
+            template = rebuild_with_path_map(expr, path_map)
+            template_json = json.dumps(template, ensure_ascii=False)
+            yield (template_json, json.dumps(wild_vals, ensure_ascii=False))
 
 
 # ---------------------------------------------------------------------------
@@ -177,7 +124,7 @@ def extract_template(triples_token_exprs):
 # ---------------------------------------------------------------------------
 
 def build_glyph_to_token_map(ontology_conn):
-    """Build glyph→token mapping from ontology.db."""
+    """Build glyph->token mapping from ontology.db."""
     c = ontology_conn.cursor()
     c.execute("SELECT glyph, token FROM symbols")
     return dict(c.fetchall())
@@ -219,16 +166,23 @@ def create_engine_db():
             step INTEGER NOT NULL,
             depth INTEGER NOT NULL,
             origin TEXT NOT NULL,
-            weight REAL NOT NULL DEFAULT 1.0
+            weight REAL NOT NULL DEFAULT 1.0,
+            indexed INTEGER NOT NULL DEFAULT 0
         );
         CREATE INDEX idx_patterns_step ON patterns(step);
-        CREATE INDEX idx_patterns_op_shape ON patterns(operator, shape);
+        CREATE INDEX idx_patterns_indexed ON patterns(indexed);
+
+        CREATE TABLE template_hashes (
+            pattern_id INTEGER NOT NULL REFERENCES patterns(id),
+            template TEXT NOT NULL,
+            wildcard_values TEXT NOT NULL
+        );
+        CREATE INDEX idx_th_template ON template_hashes(template);
 
         CREATE TABLE collisions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             template TEXT NOT NULL,
             variables TEXT NOT NULL,
-            bindings TEXT NOT NULL,
             member_count INTEGER NOT NULL,
             step INTEGER NOT NULL,
             output_token TEXT UNIQUE,
@@ -285,7 +239,6 @@ def ingest_all_triples(engine_conn, ontology_conn, glyph_map):
         subj = json.loads(subj_json)
         obj = json.loads(obj_json)
 
-        # Translate to token space
         subj_tok = translate_expr(subj, glyph_map)
         op_tok = glyph_map.get(operator, operator)
         obj_tok = translate_expr(obj, glyph_map)
@@ -293,7 +246,6 @@ def ingest_all_triples(engine_conn, ontology_conn, glyph_map):
         triple_tok = [subj_tok, op_tok, obj_tok]
         shape = compute_shape(triple_tok)
 
-        # Weight: foundation triples weigh most
         weight = (max_depth + 1 - depth) / (max_depth + 1)
 
         ec.execute(
@@ -307,137 +259,185 @@ def ingest_all_triples(engine_conn, ontology_conn, glyph_map):
 
 
 # ---------------------------------------------------------------------------
-# Collision detection
+# Collision detection — SQL-backed, incremental, streaming
 # ---------------------------------------------------------------------------
 
-def find_collisions(engine_conn):
-    """Find structural collisions across ALL patterns in the database.
+def index_new_patterns(engine_conn):
+    """Generate template hashes for patterns not yet indexed.
 
-    Groups patterns by (operator, shape) and extracts templates from
-    groups with 2+ members.
+    Templates are written directly to SQL. Python never holds the full set.
+    Returns the number of new patterns indexed.
     """
     ec = engine_conn.cursor()
 
-    # Find groups with same operator and shape — across everything
-    ec.execute("""
-        SELECT operator, shape, GROUP_CONCAT(id) as ids, COUNT(*) as cnt
-        FROM patterns
-        GROUP BY operator, shape
-        HAVING cnt >= 2
-    """)
+    ec.execute("SELECT id, triple FROM patterns WHERE indexed = 0")
+    new_patterns = ec.fetchall()
 
-    collision_groups = []
-    for op, shape, ids_str, cnt in ec.fetchall():
-        pattern_ids = [int(x) for x in ids_str.split(",")]
+    if not new_patterns:
+        return 0
 
-        # Fetch the actual triples
-        triples = []
-        for pid in pattern_ids:
-            ec.execute("SELECT triple FROM patterns WHERE id = ?", (pid,))
-            row = ec.fetchone()
-            if row:
-                triples.append((pid, json.loads(row[0])))
+    batch = []
+    for pid, triple_json in new_patterns:
+        expr = json.loads(triple_json)
+        for template_json, wild_vals_json in generate_templates_for_pattern(expr):
+            batch.append((pid, template_json, wild_vals_json))
 
-        if len(triples) >= 2:
-            collision_groups.append({
-                "operator": op,
-                "shape": shape,
-                "patterns": triples,  # [(id, triple_expr), ...]
-            })
+        # Flush in chunks to avoid building a huge list
+        if len(batch) >= 10000:
+            ec.executemany(
+                "INSERT INTO template_hashes (pattern_id, template, wildcard_values) VALUES (?, ?, ?)",
+                batch,
+            )
+            batch.clear()
 
-    return collision_groups
-
-
-def get_known_collision_keys(engine_conn):
-    """Get the set of template+member_count keys for already-discovered collisions."""
-    ec = engine_conn.cursor()
-    ec.execute("SELECT template, member_count FROM collisions")
-    return {(row[0], row[1]) for row in ec.fetchall()}
-
-
-def process_collisions(engine_conn, collision_groups, step, used_tokens, known_keys):
-    """Extract templates from collision groups and mint new tokens.
-
-    Skips collision groups that exactly match a previously discovered
-    collision (same template, same member count). Only NEW or GROWN
-    collision groups produce new tokens.
-    """
-    ec = engine_conn.cursor()
-    results = []
-
-    for group in collision_groups:
-        triple_exprs = [t[1] for t in group["patterns"]]
-        pattern_ids = [t[0] for t in group["patterns"]]
-
-        template, variables, bindings = extract_template(triple_exprs)
-        if template is None or not variables:
-            continue  # no varying positions — exact duplicates, not collisions
-
-        # Serialize for storage
-        template_json = json.dumps(template, ensure_ascii=False)
-        variables_json = json.dumps(variables, ensure_ascii=False)
-        bindings_json = json.dumps(
-            {k: [list(p) for p in v] for k, v in bindings.items()},
-            ensure_ascii=False,
+    if batch:
+        ec.executemany(
+            "INSERT INTO template_hashes (pattern_id, template, wildcard_values) VALUES (?, ?, ?)",
+            batch,
         )
 
-        # Deduplication: skip if we already found this exact collision
-        collision_key = (template_json, len(triple_exprs))
-        if collision_key in known_keys:
-            continue
-        known_keys.add(collision_key)
+    # Mark as indexed
+    for pid, _ in new_patterns:
+        ec.execute("UPDATE patterns SET indexed = 1 WHERE id = ?", (pid,))
 
-        # Mint a new token for this discovery
+    engine_conn.commit()
+    return len(new_patterns)
+
+
+def get_known_collisions(engine_conn):
+    """Get the map of template -> max member_count seen so far."""
+    ec = engine_conn.cursor()
+    ec.execute("SELECT template, MAX(member_count) FROM collisions GROUP BY template")
+    return dict(ec.fetchall())
+
+
+def find_and_process_collisions(engine_conn, step, used_tokens, known_max):
+    """Find collisions via SQL GROUP BY, process one group at a time.
+
+    1. index_new_patterns() writes template hashes to SQL (incremental)
+    2. SQL GROUP BY finds all templates with 2+ matching patterns
+    3. Each group is fetched, checked, and processed individually
+       — Python holds at most one group's members at a time
+
+    Returns (new_results_for_display, confirmed_count, grew_count).
+    """
+    ec = engine_conn.cursor()
+
+    # Step 1: index any new patterns since last call
+    index_new_patterns(engine_conn)
+
+    # Step 2: find candidate collision groups via SQL
+    ec.execute("""
+        SELECT template, COUNT(*) as cnt
+        FROM template_hashes
+        GROUP BY template
+        HAVING cnt >= 2
+    """)
+    candidates = ec.fetchall()
+
+    new_results = []
+    confirmed = 0
+    grew = 0
+
+    # Step 3: stream one group at a time
+    for template_json, cnt in candidates:
+        # Fetch members for this single group
+        ec.execute(
+            "SELECT pattern_id, wildcard_values FROM template_hashes WHERE template = ?",
+            (template_json,),
+        )
+        members = ec.fetchall()
+
+        # Aggregate wildcard values
+        all_wild_names = set()
+        parsed_vals = []
+        for pid, wv_json in members:
+            wv = json.loads(wv_json)
+            parsed_vals.append((pid, wv))
+            all_wild_names.update(wv.keys())
+
+        variables = {}
+        for wname in sorted(all_wild_names):
+            variables[wname] = [pv[1].get(wname, "") for pv in parsed_vals]
+
+        # Filter: every wildcard must have 2+ distinct values
+        all_vary = True
+        for vals in variables.values():
+            if len(set(vals)) < 2:
+                all_vary = False
+                break
+
+        if not all_vary:
+            continue
+
+        member_count = len(parsed_vals)
+        pattern_ids = [pv[0] for pv in parsed_vals]
+        variables_json = json.dumps(variables, ensure_ascii=False)
+
+        # Check against known collisions
+        prev_max = known_max.get(template_json, 0)
+
+        if member_count <= prev_max:
+            confirmed += 1
+            continue
+
+        # GREW or NEW
+        if prev_max > 0:
+            grew += 1
+
+        known_max[template_json] = member_count
+
+        # Mint token
         new_token = mint_token(used_tokens)
 
-        # Build definition
+        template = json.loads(template_json)
         definition = {
             "template": template,
             "variables": variables,
-            "member_count": len(triple_exprs),
+            "member_count": member_count,
         }
         definition_json = json.dumps(definition, ensure_ascii=False)
 
-        # Store collision
         ec.execute(
-            "INSERT INTO collisions (template, variables, bindings, member_count, step, output_token, definition) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (template_json, variables_json, bindings_json, len(triple_exprs), step, new_token, definition_json),
+            "INSERT INTO collisions (template, variables, member_count, step, output_token, definition) VALUES (?, ?, ?, ?, ?, ?)",
+            (template_json, variables_json, member_count, step, new_token, definition_json),
         )
         collision_id = ec.lastrowid
 
-        # Store member links
         for pid in pattern_ids:
             ec.execute(
                 "INSERT INTO collision_members (collision_id, pattern_id) VALUES (?, ?)",
                 (collision_id, pid),
             )
 
-        # Add to vocabulary
         ec.execute(
             "INSERT INTO vocabulary (token, name, origin, step) VALUES (?, ?, 'derived', ?)",
             (new_token, f"collision-{collision_id}", step),
         )
 
-        # Create derived pattern with weight based on member count
-        # More instances = higher confidence = higher weight
-        derived_weight = min(1.0, len(triple_exprs) / 10.0)
-        derived_triple = [new_token, "≡", template]
+        # Derived pattern
+        derived_weight = min(1.0, member_count / 10.0)
+        derived_triple = [new_token, "\u2261", template]
         derived_shape = compute_shape(derived_triple)
         ec.execute(
             "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, ?, ?, 'derived', ?)",
-            (json.dumps(derived_triple, ensure_ascii=False), derived_shape, "≡", step, step + 1, derived_weight),
+            (json.dumps(derived_triple, ensure_ascii=False), derived_shape, "\u2261", step, step + 1, derived_weight),
         )
 
-        results.append({
+        new_results.append({
             "collision_id": collision_id,
             "token": new_token,
             "template": template,
             "variables": variables,
-            "members": len(triple_exprs),
+            "members": member_count,
+            "grew_from": prev_max if prev_max > 0 else None,
         })
 
+        # Free parsed_vals for this group
+        del parsed_vals, members
+
     engine_conn.commit()
-    return results
+    return new_results, confirmed, grew
 
 
 # ---------------------------------------------------------------------------
@@ -445,20 +445,13 @@ def process_collisions(engine_conn, collision_groups, step, used_tokens, known_k
 # ---------------------------------------------------------------------------
 
 def validate_step(engine_conn, ontology_conn, glyph_map, step):
-    """Check if engine discoveries correspond to ontology statements.
-
-    For each collision template, check if the ontology contains an explicit
-    universal (∀) or definition (≡) that captures the same pattern.
-    """
+    """Check if engine discoveries correspond to ontology statements."""
     ec = engine_conn.cursor()
     oc = ontology_conn.cursor()
 
-    # Get this step's collisions
     ec.execute("SELECT id, template, variables, member_count FROM collisions WHERE step = ?", (step,))
     collisions = ec.fetchall()
 
-    # Get ontology definitions and laws for comparison
-    # Reverse the glyph map for token→glyph lookup
     token_to_glyph = {v: k for k, v in glyph_map.items()}
 
     validations = []
@@ -466,11 +459,10 @@ def validate_step(engine_conn, ontology_conn, glyph_map, step):
         template = json.loads(template_json)
         variables = json.loads(variables_json)
 
-        # Translate template back to glyph space for comparison
         def detokenize(expr):
             if isinstance(expr, str):
                 if expr.startswith("_"):
-                    return expr  # keep wildcards
+                    return expr
                 return token_to_glyph.get(expr, expr)
             if isinstance(expr, list):
                 return [detokenize(e) for e in expr]
@@ -478,8 +470,6 @@ def validate_step(engine_conn, ontology_conn, glyph_map, step):
 
         glyph_template = detokenize(template)
 
-        # Check if any constant token in the template has an explicit ≡ definition
-        # in the ontology (meaning the ontology formalizes what the engine discovered)
         constant_tokens = set()
         for pos, tok in flatten_positions(template):
             if isinstance(tok, str) and not tok.startswith("_"):
@@ -487,7 +477,6 @@ def validate_step(engine_conn, ontology_conn, glyph_map, step):
                 if glyph:
                     constant_tokens.add(glyph)
 
-        # Look for ontology definitions of the constant symbols
         matches = []
         for glyph in constant_tokens:
             oc.execute(

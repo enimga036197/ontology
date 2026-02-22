@@ -1,10 +1,12 @@
 """Run the collision engine for N steps.
 
 Every step sees the FULL ontology + all previous discoveries.
-Step 0: 365 seed triples → collisions → new tokens
-Step N: 365 seed + all derived from steps 0..N-1 → collisions → new tokens
+Output shows three streams:
+  - CONFIRMED: re-validated previous discoveries (the heartbeat)
+  - GREW: existing collision groups that gained new members
+  - NEW: genuinely novel collision groups
 
-Depth-from-root normalizes weight: foundation triples weigh most.
+All state lives in SQLite. No OOM regardless of scale.
 
 Usage: python engine/run.py [--steps N]
 """
@@ -25,10 +27,8 @@ from core import (
     create_engine_db,
     seed_vocabulary,
     ingest_all_triples,
-    find_collisions,
-    process_collisions,
-    get_known_collision_keys,
-    validate_step,
+    find_and_process_collisions,
+    get_known_collisions,
     build_glyph_to_token_map,
     ONTOLOGY_DB,
     ENGINE_DB,
@@ -41,8 +41,8 @@ def get_used_tokens(engine_conn):
     return {row[0] for row in c.fetchall()}
 
 
-def print_collision_detail(result, token_to_glyph):
-    """Pretty-print a single collision discovery."""
+def fmt_collision(result, token_to_glyph):
+    """Format a single collision as a compact string."""
     template = result["template"]
 
     def detok(expr):
@@ -55,17 +55,19 @@ def print_collision_detail(result, token_to_glyph):
         return expr
 
     glyph_tmpl = detok(template)
+    grew = result.get("grew_from")
+    prefix = f"GREW {grew}\u2192{result['members']}" if grew else f"NEW  {result['members']} inst"
 
-    var_strs = []
+    var_parts = []
     for var_name, values in result["variables"].items():
         glyph_vals = [token_to_glyph.get(v, v[:6]) for v in values]
         unique = list(dict.fromkeys(glyph_vals))
-        shown = unique[:6]
-        suffix = f"...+{len(unique)-6}" if len(unique) > 6 else ""
-        var_strs.append(f"{var_name}∈{{{','.join(shown)}{suffix}}}")
+        shown = unique[:5]
+        suffix = f"..+{len(unique)-5}" if len(unique) > 5 else ""
+        var_parts.append(f"{var_name}\u2208{{{','.join(shown)}{suffix}}}")
 
-    print(f"    {result['token']} ← {json.dumps(glyph_tmpl, ensure_ascii=False)}")
-    print(f"      {result['members']} inst | {' ; '.join(var_strs)}")
+    tmpl_str = json.dumps(glyph_tmpl, ensure_ascii=False)
+    return f"    {result['token']} [{prefix}] {tmpl_str}  {' ; '.join(var_parts)}"
 
 
 def run(num_steps=100):
@@ -78,90 +80,80 @@ def run(num_steps=100):
     token_to_glyph = {v: k for k, v in glyph_map.items()}
 
     print(f"=== Collision Engine ===")
-    print(f"Ontology: {ONTOLOGY_DB}")
-    print(f"Engine DB: {ENGINE_DB}")
-    print(f"Steps: {num_steps}")
-    print(f"Seed vocabulary: {len(glyph_map)} tokens")
+    print(f"Steps: {num_steps} | Seed: {len(glyph_map)} tokens")
     print()
 
-    # Create fresh engine DB
+    # Fresh engine
     engine_conn = create_engine_db()
     seed_vocabulary(engine_conn, ontology_conn)
 
-    # Step 0: ingest ALL ontology triples
+    # Step 0 seed: ALL ontology triples
     ingested = ingest_all_triples(engine_conn, ontology_conn, glyph_map)
-    print(f"Ingested all {ingested} ontology triples at step 0")
-    print()
+    print(f"Seed: {ingested} ontology triples loaded\n")
 
-    # Track known collisions for deduplication
-    known_keys = get_known_collision_keys(engine_conn)
-
-    step_stats = []
+    known_max = get_known_collisions(engine_conn)
+    step_log = []
 
     for step in range(num_steps):
         t0 = time.time()
 
-        # Count patterns
         c = engine_conn.cursor()
         c.execute("SELECT COUNT(*) FROM patterns")
         total_patterns = c.fetchone()[0]
 
-        # Find collisions across ALL patterns
-        collision_groups = find_collisions(engine_conn)
-
-        # Process — only NEW collisions get tokens
         used_tokens = get_used_tokens(engine_conn)
-        results = process_collisions(engine_conn, collision_groups, step, used_tokens, known_keys)
+        new_results, confirmed, grew = find_and_process_collisions(
+            engine_conn, step, used_tokens, known_max
+        )
 
-        # Update token_to_glyph with new derived tokens
-        for r in results:
+        # Update reverse map for display
+        for r in new_results:
             token_to_glyph[r["token"]] = f"C{r['collision_id']}"
 
         elapsed = time.time() - t0
 
-        # Stats
-        c.execute("SELECT COUNT(*) FROM vocabulary WHERE origin = 'derived'")
-        derived_vocab = c.fetchone()[0]
         c.execute("SELECT COUNT(*) FROM collisions")
         total_collisions = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM vocabulary WHERE origin = 'derived'")
+        derived_vocab = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM template_hashes")
+        total_hashes = c.fetchone()[0]
 
-        step_stats.append({
+        new_count = len(new_results) - grew
+        step_log.append({
             "step": step,
             "patterns": total_patterns,
-            "new_collisions": len(results),
+            "confirmed": confirmed,
+            "grew": grew,
+            "new": new_count,
+            "minted": len(new_results),
             "total_collisions": total_collisions,
             "derived_vocab": derived_vocab,
+            "hashes": total_hashes,
             "elapsed": elapsed,
         })
 
-        # Print every step
-        new_str = f"{len(results)} new" if results else "0 new"
-        print(f"  Step {step:3d} | {total_patterns:5d} patterns | {new_str:8s} | {total_collisions:5d} total | {derived_vocab:5d} derived | {elapsed:.2f}s")
+        # Print step summary
+        parts = []
+        if confirmed:
+            parts.append(f"{confirmed} confirmed")
+        if grew:
+            parts.append(f"{grew} grew")
+        if new_count:
+            parts.append(f"{new_count} new")
 
-        # Print details for new discoveries
-        if results:
-            for r in results:
-                print_collision_detail(r, token_to_glyph)
+        status = " | ".join(parts) if parts else "\u2014"
+        print(f"Step {step:3d} | {total_patterns:5d} pat | {total_hashes:7d} hashes | {status} | {derived_vocab} derived | {elapsed:.2f}s")
 
-        # If no new collisions found, note it but keep going
-        # (new patterns from this step may create collisions in future steps)
-        if not results and step > 0:
-            # Check if we've had many consecutive empty steps
-            consecutive_empty = 0
-            for s in reversed(step_stats):
-                if s["new_collisions"] == 0:
-                    consecutive_empty += 1
-                else:
-                    break
-            if consecutive_empty >= 10:
-                print(f"\n  [10 consecutive empty steps — engine has converged]")
-                break
+        # Print details for grew/new
+        for r in new_results:
+            print(fmt_collision(r, token_to_glyph))
 
         engine_conn.commit()
 
     # Summary
     print(f"\n{'='*70}")
-    print(f"=== Engine Summary ===")
+    print(f"=== Summary after {num_steps} steps ===")
     c = engine_conn.cursor()
     c.execute("SELECT COUNT(*) FROM vocabulary WHERE origin = 'seed'")
     seed_count = c.fetchone()[0]
@@ -173,23 +165,19 @@ def run(num_steps=100):
     derived_patterns = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM collisions")
     total_coll = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM template_hashes")
+    total_hashes = c.fetchone()[0]
 
     print(f"  Vocabulary: {seed_count} seed + {derived_count} derived = {seed_count + derived_count}")
-    print(f"  Patterns: {seed_patterns} seed + {derived_patterns} derived = {seed_patterns + derived_patterns}")
-    print(f"  Collisions: {total_coll} total")
-    print(f"  Engine DB: {ENGINE_DB}")
+    print(f"  Patterns:   {seed_patterns} seed + {derived_patterns} derived = {seed_patterns + derived_patterns}")
+    print(f"  Collisions: {total_coll} total minted")
+    print(f"  Template hashes: {total_hashes} on disk")
 
     # Growth curve
-    print(f"\n=== Growth Curve ===")
-    print(f"  {'Step':>5s}  {'Patterns':>8s}  {'New':>5s}  {'Total':>6s}  {'Derived':>7s}")
-    for s in step_stats:
-        print(f"  {s['step']:5d}  {s['patterns']:8d}  {s['new_collisions']:5d}  {s['total_collisions']:6d}  {s['derived_vocab']:7d}")
-
-    # Collisions by step
-    print(f"\n=== Collisions by Step ===")
-    c.execute("SELECT step, COUNT(*), SUM(member_count) FROM collisions GROUP BY step ORDER BY step")
-    for step_num, count, members in c.fetchall():
-        print(f"  Step {step_num}: {count} collisions ({members} total members)")
+    print(f"\n=== Growth ===")
+    print(f"  {'Step':>5s} {'Patterns':>8s} {'Hashes':>8s} {'Confirmed':>9s} {'Grew':>5s} {'New':>4s} {'Minted':>6s} {'Derived':>7s} {'Time':>6s}")
+    for s in step_log:
+        print(f"  {s['step']:5d} {s['patterns']:8d} {s['hashes']:8d} {s['confirmed']:9d} {s['grew']:5d} {s['new']:4d} {s['minted']:6d} {s['derived_vocab']:7d} {s['elapsed']:5.1f}s")
 
     engine_conn.close()
     ontology_conn.close()
