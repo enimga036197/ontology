@@ -32,6 +32,16 @@ ONTOLOGY_DB = os.path.join(ROOT, "ontology.db")
 ENGINE_DB = os.path.join(ROOT, "engine", "engine.db")
 
 
+def apply_pragmas(conn):
+    """Set SQLite performance pragmas. WAL + large cache + memory temp store."""
+    c = conn.cursor()
+    c.execute("PRAGMA journal_mode=WAL")
+    c.execute("PRAGMA synchronous=NORMAL")
+    c.execute("PRAGMA cache_size=-128000")   # 128MB page cache
+    c.execute("PRAGMA mmap_size=536870912")  # 512MB memory-mapped I/O
+    c.execute("PRAGMA temp_store=MEMORY")
+
+
 # ---------------------------------------------------------------------------
 # Token utilities
 # ---------------------------------------------------------------------------
@@ -71,12 +81,35 @@ def flatten_positions(expr, path=()):
             yield from flatten_positions(item, path + (i,))
 
 
-def rebuild_with_path_map(expr, path_map, path=()):
-    """Rebuild an expression tree, replacing leaf values per path->value map."""
+def flatten_all_positions(expr, path=()):
+    """Yield (path_tuple, value, is_subtree) for leaves AND internal nodes.
+
+    Leaves yield their token string. Internal nodes yield the entire sub-list.
+    The root itself is excluded (only children and deeper).
+    """
     if isinstance(expr, str):
-        return path_map.get(path, expr)
+        yield (path, expr, False)
+    elif isinstance(expr, list):
+        for i, item in enumerate(expr):
+            if isinstance(item, list):
+                # This is a sub-tree — yield it as a wildcardable position
+                yield (path + (i,), item, True)
+            # Always recurse into children for leaf positions
+            yield from flatten_all_positions(item, path + (i,))
+
+
+def rebuild_with_subtree_map(expr, path_map, path=()):
+    """Rebuild expression tree, replacing values per path->value map.
+
+    If a path maps to a string, replace that node entirely (works for both
+    leaves and sub-trees being replaced by a wildcard name).
+    """
+    if path in path_map:
+        return path_map[path]
+    if isinstance(expr, str):
+        return expr
     if isinstance(expr, list):
-        return [rebuild_with_path_map(e, path_map, path + (i,)) for i, e in enumerate(expr)]
+        return [rebuild_with_subtree_map(e, path_map, path + (i,)) for i, e in enumerate(expr)]
     return expr
 
 
@@ -87,35 +120,63 @@ def rebuild_with_path_map(expr, path_map, path=()):
 def generate_templates_for_pattern(expr, max_wildcards=3):
     """Generate wildcard templates from a token expression.
 
+    Two kinds of wildcarding:
+    1. LEAF wildcards: replace individual token atoms (original behavior)
+    2. SUB-TREE wildcards: replace entire nested sub-expressions with a single
+       wildcard, collapsing deep structure so expressions with different depths
+       but similar top-level shape can collide.
+
     Yields (template_json_str, wildcard_values_json_str) tuples.
-    Polynomial complexity: O(N^max_wildcards) per pattern.
     """
-    positions = list(flatten_positions(expr))
-    n = len(positions)
+    # Collect all wildcardable positions: leaves + sub-trees
+    all_positions = list(flatten_all_positions(expr))
+    n = len(all_positions)
 
     if n < 2:
         return
 
     max_w = min(max_wildcards, n - 1)
+    seen = set()
 
     for num_wild in range(1, max_w + 1):
         for wild_indices in combinations(range(n), num_wild):
-            wild_set = set(wild_indices)
+            # Check that no wildcard is an ancestor/descendant of another
+            wild_paths = [all_positions[i][0] for i in wild_indices]
+            skip = False
+            for a in range(len(wild_paths)):
+                for b in range(a + 1, len(wild_paths)):
+                    pa, pb = wild_paths[a], wild_paths[b]
+                    if pa == pb[:len(pa)] or pb == pa[:len(pb)]:
+                        skip = True
+                        break
+                if skip:
+                    break
+            if skip:
+                continue
+
             path_map = {}
             wild_vals = {}
             wild_idx = 0
 
-            for i, (path, token) in enumerate(positions):
-                if i in wild_set:
-                    wname = f"_{wild_idx}"
-                    path_map[path] = wname
-                    wild_vals[wname] = token
-                    wild_idx += 1
+            for i in wild_indices:
+                path, value, is_subtree = all_positions[i]
+                wname = f"_{wild_idx}"
+                path_map[path] = wname
+                # For sub-trees, serialize the whole sub-expression as the value
+                if is_subtree:
+                    wild_vals[wname] = json.dumps(value, ensure_ascii=False)
                 else:
-                    path_map[path] = token
+                    wild_vals[wname] = value
+                wild_idx += 1
 
-            template = rebuild_with_path_map(expr, path_map)
+            template = rebuild_with_subtree_map(expr, path_map)
             template_json = json.dumps(template, ensure_ascii=False)
+
+            # Deduplicate — different position combinations can produce same template
+            if template_json in seen:
+                continue
+            seen.add(template_json)
+
             yield (template_json, json.dumps(wild_vals, ensure_ascii=False))
 
 
@@ -149,6 +210,7 @@ def create_engine_db():
         os.remove(ENGINE_DB)
 
     conn = sqlite3.connect(ENGINE_DB)
+    apply_pragmas(conn)
     c = conn.cursor()
     c.executescript("""
         CREATE TABLE vocabulary (
@@ -175,9 +237,11 @@ def create_engine_db():
         CREATE TABLE template_hashes (
             pattern_id INTEGER NOT NULL REFERENCES patterns(id),
             template TEXT NOT NULL,
-            wildcard_values TEXT NOT NULL
+            wildcard_values TEXT NOT NULL,
+            indexing_step INTEGER NOT NULL DEFAULT 0
         );
         CREATE INDEX idx_th_template ON template_hashes(template);
+        CREATE INDEX idx_th_step ON template_hashes(indexing_step);
 
         CREATE TABLE collisions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -262,7 +326,7 @@ def ingest_all_triples(engine_conn, ontology_conn, glyph_map):
 # Collision detection — SQL-backed, incremental, streaming
 # ---------------------------------------------------------------------------
 
-def index_new_patterns(engine_conn):
+def index_new_patterns(engine_conn, step):
     """Generate template hashes for patterns not yet indexed.
 
     Templates are written directly to SQL. Python never holds the full set.
@@ -280,25 +344,24 @@ def index_new_patterns(engine_conn):
     for pid, triple_json in new_patterns:
         expr = json.loads(triple_json)
         for template_json, wild_vals_json in generate_templates_for_pattern(expr):
-            batch.append((pid, template_json, wild_vals_json))
+            batch.append((pid, template_json, wild_vals_json, step))
 
         # Flush in chunks to avoid building a huge list
         if len(batch) >= 10000:
             ec.executemany(
-                "INSERT INTO template_hashes (pattern_id, template, wildcard_values) VALUES (?, ?, ?)",
+                "INSERT INTO template_hashes (pattern_id, template, wildcard_values, indexing_step) VALUES (?, ?, ?, ?)",
                 batch,
             )
             batch.clear()
 
     if batch:
         ec.executemany(
-            "INSERT INTO template_hashes (pattern_id, template, wildcard_values) VALUES (?, ?, ?)",
+            "INSERT INTO template_hashes (pattern_id, template, wildcard_values, indexing_step) VALUES (?, ?, ?, ?)",
             batch,
         )
 
-    # Mark as indexed
-    for pid, _ in new_patterns:
-        ec.execute("UPDATE patterns SET indexed = 1 WHERE id = ?", (pid,))
+    # Batch mark as indexed
+    ec.execute("UPDATE patterns SET indexed = 1 WHERE indexed = 0")
 
     engine_conn.commit()
     return len(new_patterns)
@@ -315,28 +378,33 @@ def find_and_process_collisions(engine_conn, step, used_tokens, known_max):
     """Find collisions via SQL GROUP BY, process one group at a time.
 
     1. index_new_patterns() writes template hashes to SQL (incremental)
-    2. SQL GROUP BY finds all templates with 2+ matching patterns
-    3. Each group is fetched, checked, and processed individually
-       — Python holds at most one group's members at a time
+    2. SQL finds templates that got NEW members this step (via indexing_step)
+    3. Only those templates are checked — not the entire table
+    4. Previously known collisions without new members are confirmed by definition
 
     Returns (new_results_for_display, confirmed_count, grew_count).
     """
     ec = engine_conn.cursor()
 
-    # Step 1: index any new patterns since last call
-    index_new_patterns(engine_conn)
+    # All previously known collisions are confirmed (we never delete patterns)
+    confirmed = len(known_max)
 
-    # Step 2: find candidate collision groups via SQL
+    # Step 1: index any new patterns since last call
+    index_new_patterns(engine_conn, step)
+
+    # Step 2: find candidates — only templates that got new rows this step
     ec.execute("""
-        SELECT template, COUNT(*) as cnt
-        FROM template_hashes
-        GROUP BY template
+        SELECT th.template, COUNT(*) as cnt
+        FROM template_hashes th
+        WHERE th.template IN (
+            SELECT DISTINCT template FROM template_hashes WHERE indexing_step = ?
+        )
+        GROUP BY th.template
         HAVING cnt >= 2
-    """)
+    """, (step,))
     candidates = ec.fetchall()
 
     new_results = []
-    confirmed = 0
     grew = 0
 
     # Step 3: stream one group at a time
@@ -378,7 +446,6 @@ def find_and_process_collisions(engine_conn, step, used_tokens, known_max):
         prev_max = known_max.get(template_json, 0)
 
         if member_count <= prev_max:
-            confirmed += 1
             continue
 
         # GREW or NEW

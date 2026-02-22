@@ -30,6 +30,7 @@ from core import (
     find_and_process_collisions,
     get_known_collisions,
     build_glyph_to_token_map,
+    apply_pragmas,
     ONTOLOGY_DB,
     ENGINE_DB,
 )
@@ -76,6 +77,7 @@ def run(num_steps=100):
         sys.exit(1)
 
     ontology_conn = sqlite3.connect(ONTOLOGY_DB)
+    apply_pragmas(ontology_conn)
     glyph_map = build_glyph_to_token_map(ontology_conn)
     token_to_glyph = {v: k for k, v in glyph_map.items()}
 
