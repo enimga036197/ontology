@@ -29,6 +29,8 @@ from core import (
     ingest_all_triples,
     find_and_process_collisions,
     get_known_collisions,
+    find_membership_collisions,
+    get_known_membership_collisions,
     build_glyph_to_token_map,
     apply_pragmas,
     ONTOLOGY_DB,
@@ -71,6 +73,24 @@ def fmt_collision(result, token_to_glyph):
     return f"    {result['token']} [{prefix}] {tmpl_str}  {' ; '.join(var_parts)}"
 
 
+def fmt_membership_collision(result, token_to_glyph):
+    """Format a membership collision (theory) as a compact string."""
+    grew = result.get("grew_from")
+    prefix = f"GREW {grew}\u2192{result['collision_count']}" if grew else f"NEW  {result['collision_count']} coll"
+
+    coll_names = [f"C{cid}" for cid in result["collision_ids"]]
+    shown = coll_names[:5]
+    suffix = f"..+{len(coll_names)-5}" if len(coll_names) > 5 else ""
+
+    subj_glyphs = [token_to_glyph.get(s, s[:6]) for s in result["subject_set"]]
+    subj_shown = subj_glyphs[:8]
+    subj_suffix = f"..+{len(subj_glyphs)-8}" if len(subj_glyphs) > 8 else ""
+
+    return (f"    {result['token']} [{prefix}] "
+            f"theories={{{','.join(shown)}{suffix}}} "
+            f"shared={{{','.join(subj_shown)}{subj_suffix}}} ({result['subject_count']} subj)")
+
+
 def run(num_steps=100):
     if not os.path.exists(ONTOLOGY_DB):
         print(f"ERROR: {ONTOLOGY_DB} not found. Run tools/build_db.py first.")
@@ -94,6 +114,7 @@ def run(num_steps=100):
     print(f"Seed: {ingested} ontology triples loaded\n")
 
     known_max = get_known_collisions(engine_conn)
+    known_membership_max = get_known_membership_collisions(engine_conn)
     step_log = []
 
     for step in range(num_steps):
@@ -104,24 +125,41 @@ def run(num_steps=100):
         total_patterns = c.fetchone()[0]
 
         used_tokens = get_used_tokens(engine_conn)
+        equiv_token = glyph_map["≡"]
+        conj_token = glyph_map["∧"]
+        member_of_token = glyph_map["∈"]
+
+        # Phase 1: Template collisions
         new_results, confirmed, grew = find_and_process_collisions(
-            engine_conn, step, used_tokens, known_max
+            engine_conn, step, used_tokens, known_max, equiv_token
         )
 
-        # Update reverse map for display
         for r in new_results:
             token_to_glyph[r["token"]] = f"C{r['collision_id']}"
+
+        # Phase 2: Membership collisions
+        used_tokens = get_used_tokens(engine_conn)
+        mc_results, mc_confirmed, mc_grew = find_membership_collisions(
+            engine_conn, step, used_tokens, known_membership_max,
+            equiv_token, conj_token, member_of_token,
+        )
+
+        for r in mc_results:
+            token_to_glyph[r["token"]] = f"T{r['mc_id']}"
 
         elapsed = time.time() - t0
 
         c.execute("SELECT COUNT(*) FROM collisions")
         total_collisions = c.fetchone()[0]
+        c.execute("SELECT COUNT(*) FROM membership_collisions")
+        total_theories = c.fetchone()[0]
         c.execute("SELECT COUNT(*) FROM vocabulary WHERE origin = 'derived'")
         derived_vocab = c.fetchone()[0]
         c.execute("SELECT COUNT(*) FROM template_hashes")
         total_hashes = c.fetchone()[0]
 
         new_count = len(new_results) - grew
+        mc_new_count = len(mc_results) - mc_grew
         step_log.append({
             "step": step,
             "patterns": total_patterns,
@@ -129,27 +167,45 @@ def run(num_steps=100):
             "grew": grew,
             "new": new_count,
             "minted": len(new_results),
+            "mc_confirmed": mc_confirmed,
+            "mc_grew": mc_grew,
+            "mc_new": mc_new_count,
+            "mc_minted": len(mc_results),
             "total_collisions": total_collisions,
+            "total_theories": total_theories,
             "derived_vocab": derived_vocab,
             "hashes": total_hashes,
             "elapsed": elapsed,
         })
 
         # Print step summary
-        parts = []
+        p1_parts = []
         if confirmed:
-            parts.append(f"{confirmed} confirmed")
+            p1_parts.append(f"{confirmed} conf")
         if grew:
-            parts.append(f"{grew} grew")
+            p1_parts.append(f"{grew} grew")
         if new_count:
-            parts.append(f"{new_count} new")
+            p1_parts.append(f"{new_count} new")
 
-        status = " | ".join(parts) if parts else "\u2014"
-        print(f"Step {step:3d} | {total_patterns:5d} pat | {total_hashes:7d} hashes | {status} | {derived_vocab} derived | {elapsed:.2f}s")
+        p2_parts = []
+        if mc_confirmed:
+            p2_parts.append(f"{mc_confirmed} conf")
+        if mc_grew:
+            p2_parts.append(f"{mc_grew} grew")
+        if mc_new_count:
+            p2_parts.append(f"{mc_new_count} new")
 
-        # Print details for grew/new
+        p1_status = " | ".join(p1_parts) if p1_parts else "\u2014"
+        p2_status = " | ".join(p2_parts) if p2_parts else "\u2014"
+        print(f"Step {step:3d} | {total_patterns:5d} pat | P1: {p1_status} | P2: {p2_status} | {total_theories} theories | {derived_vocab} derived | {elapsed:.2f}s")
+
+        # Print Phase 1 details
         for r in new_results:
             print(fmt_collision(r, token_to_glyph))
+
+        # Print Phase 2 details
+        for r in mc_results:
+            print(fmt_membership_collision(r, token_to_glyph))
 
         engine_conn.commit()
 
@@ -167,19 +223,21 @@ def run(num_steps=100):
     derived_patterns = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM collisions")
     total_coll = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM membership_collisions")
+    total_theories = c.fetchone()[0]
     c.execute("SELECT COUNT(*) FROM template_hashes")
     total_hashes = c.fetchone()[0]
 
     print(f"  Vocabulary: {seed_count} seed + {derived_count} derived = {seed_count + derived_count}")
     print(f"  Patterns:   {seed_patterns} seed + {derived_patterns} derived = {seed_patterns + derived_patterns}")
-    print(f"  Collisions: {total_coll} total minted")
+    print(f"  Collisions: {total_coll} (P1) + {total_theories} theories (P2)")
     print(f"  Template hashes: {total_hashes} on disk")
 
     # Growth curve
     print(f"\n=== Growth ===")
-    print(f"  {'Step':>5s} {'Patterns':>8s} {'Hashes':>8s} {'Confirmed':>9s} {'Grew':>5s} {'New':>4s} {'Minted':>6s} {'Derived':>7s} {'Time':>6s}")
+    print(f"  {'Step':>5s} {'Pat':>6s} {'P1 new':>6s} {'P1 grew':>7s} {'P2 new':>6s} {'P2 grew':>7s} {'Theories':>8s} {'Derived':>7s} {'Time':>6s}")
     for s in step_log:
-        print(f"  {s['step']:5d} {s['patterns']:8d} {s['hashes']:8d} {s['confirmed']:9d} {s['grew']:5d} {s['new']:4d} {s['minted']:6d} {s['derived_vocab']:7d} {s['elapsed']:5.1f}s")
+        print(f"  {s['step']:5d} {s['patterns']:6d} {s['new']:6d} {s['grew']:7d} {s['mc_new']:6d} {s['mc_grew']:7d} {s['total_theories']:8d} {s['derived_vocab']:7d} {s['elapsed']:5.1f}s")
 
     engine_conn.close()
     ontology_conn.close()

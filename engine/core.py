@@ -8,7 +8,7 @@ differ in specific tokens — are the engine's discoveries. Each discovery
 gets a new opaque token and is fed back for the next step.
 
 Hash collision mechanism: for each pattern, generate every possible template
-by wildcarding each subset of leaf positions (up to max_wildcards deep).
+by wildcarding each subset of leaf positions (up to max_wildcards leaves).
 Two patterns that produce the same template ARE a collision — a structural
 similarity the engine discovers without being told what to look for.
 
@@ -81,56 +81,30 @@ def flatten_positions(expr, path=()):
             yield from flatten_positions(item, path + (i,))
 
 
-def flatten_all_positions(expr, path=()):
-    """Yield (path_tuple, value, is_subtree) for leaves AND internal nodes.
-
-    Leaves yield their token string. Internal nodes yield the entire sub-list.
-    The root itself is excluded (only children and deeper).
-    """
-    if isinstance(expr, str):
-        yield (path, expr, False)
-    elif isinstance(expr, list):
-        for i, item in enumerate(expr):
-            if isinstance(item, list):
-                # This is a sub-tree — yield it as a wildcardable position
-                yield (path + (i,), item, True)
-            # Always recurse into children for leaf positions
-            yield from flatten_all_positions(item, path + (i,))
-
-
-def rebuild_with_subtree_map(expr, path_map, path=()):
-    """Rebuild expression tree, replacing values per path->value map.
-
-    If a path maps to a string, replace that node entirely (works for both
-    leaves and sub-trees being replaced by a wildcard name).
-    """
-    if path in path_map:
-        return path_map[path]
-    if isinstance(expr, str):
-        return expr
-    if isinstance(expr, list):
-        return [rebuild_with_subtree_map(e, path_map, path + (i,)) for i, e in enumerate(expr)]
-    return expr
-
-
 # ---------------------------------------------------------------------------
 # Template generation
 # ---------------------------------------------------------------------------
 
+def rebuild_with_map(expr, path_map, path=()):
+    """Rebuild expression tree, replacing leaf values per path->value map."""
+    if isinstance(expr, str):
+        return path_map.get(path, expr)
+    if isinstance(expr, list):
+        return [rebuild_with_map(e, path_map, path + (i,)) for i, e in enumerate(expr)]
+    return expr
+
+
 def generate_templates_for_pattern(expr, max_wildcards=3):
     """Generate wildcard templates from a token expression.
 
-    Two kinds of wildcarding:
-    1. LEAF wildcards: replace individual token atoms (original behavior)
-    2. SUB-TREE wildcards: replace entire nested sub-expressions with a single
-       wildcard, collapsing deep structure so expressions with different depths
-       but similar top-level shape can collide.
+    Leaf-only wildcarding: replace subsets of leaf tokens with wildcard names.
+    Two patterns that produce the same template ARE a collision — they share
+    structural form but differ in specific leaf tokens.
 
     Yields (template_json_str, wildcard_values_json_str) tuples.
     """
-    # Collect all wildcardable positions: leaves + sub-trees
-    all_positions = list(flatten_all_positions(expr))
-    n = len(all_positions)
+    leaves = list(flatten_positions(expr))
+    n = len(leaves)
 
     if n < 2:
         return
@@ -140,39 +114,18 @@ def generate_templates_for_pattern(expr, max_wildcards=3):
 
     for num_wild in range(1, max_w + 1):
         for wild_indices in combinations(range(n), num_wild):
-            # Check that no wildcard is an ancestor/descendant of another
-            wild_paths = [all_positions[i][0] for i in wild_indices]
-            skip = False
-            for a in range(len(wild_paths)):
-                for b in range(a + 1, len(wild_paths)):
-                    pa, pb = wild_paths[a], wild_paths[b]
-                    if pa == pb[:len(pa)] or pb == pa[:len(pb)]:
-                        skip = True
-                        break
-                if skip:
-                    break
-            if skip:
-                continue
-
             path_map = {}
             wild_vals = {}
-            wild_idx = 0
 
-            for i in wild_indices:
-                path, value, is_subtree = all_positions[i]
+            for wild_idx, i in enumerate(wild_indices):
+                path, token = leaves[i]
                 wname = f"_{wild_idx}"
                 path_map[path] = wname
-                # For sub-trees, serialize the whole sub-expression as the value
-                if is_subtree:
-                    wild_vals[wname] = json.dumps(value, ensure_ascii=False)
-                else:
-                    wild_vals[wname] = value
-                wild_idx += 1
+                wild_vals[wname] = token
 
-            template = rebuild_with_subtree_map(expr, path_map)
+            template = rebuild_with_map(expr, path_map)
             template_json = json.dumps(template, ensure_ascii=False)
 
-            # Deduplicate — different position combinations can produce same template
             if template_json in seen:
                 continue
             seen.add(template_json)
@@ -259,6 +212,43 @@ def create_engine_db():
         );
         CREATE INDEX idx_cm_collision ON collision_members(collision_id);
         CREATE INDEX idx_cm_pattern ON collision_members(pattern_id);
+
+        -- Phase 2: membership collision tables
+        CREATE TABLE collision_subjects (
+            collision_id INTEGER NOT NULL REFERENCES collisions(id),
+            subject_token TEXT NOT NULL,
+            indexing_step INTEGER NOT NULL
+        );
+        CREATE INDEX idx_cs_collision ON collision_subjects(collision_id);
+        CREATE INDEX idx_cs_subject ON collision_subjects(subject_token);
+        CREATE INDEX idx_cs_step ON collision_subjects(indexing_step);
+
+        CREATE TABLE membership_hashes (
+            collision_id INTEGER NOT NULL REFERENCES collisions(id),
+            subject_set_key TEXT NOT NULL,
+            subject_count INTEGER NOT NULL,
+            indexing_step INTEGER NOT NULL
+        );
+        CREATE INDEX idx_mh_key ON membership_hashes(subject_set_key);
+        CREATE INDEX idx_mh_step ON membership_hashes(indexing_step);
+
+        CREATE TABLE membership_collisions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject_set_key TEXT NOT NULL,
+            collision_ids TEXT NOT NULL,
+            collision_count INTEGER NOT NULL,
+            subject_count INTEGER NOT NULL,
+            step INTEGER NOT NULL,
+            output_token TEXT UNIQUE,
+            definition TEXT NOT NULL
+        );
+
+        CREATE TABLE membership_collision_members (
+            membership_collision_id INTEGER NOT NULL REFERENCES membership_collisions(id),
+            collision_id INTEGER NOT NULL REFERENCES collisions(id)
+        );
+        CREATE INDEX idx_mcm_mc ON membership_collision_members(membership_collision_id);
+        CREATE INDEX idx_mcm_collision ON membership_collision_members(collision_id);
     """)
     conn.commit()
     return conn
@@ -374,13 +364,15 @@ def get_known_collisions(engine_conn):
     return dict(ec.fetchall())
 
 
-def find_and_process_collisions(engine_conn, step, used_tokens, known_max):
+def find_and_process_collisions(engine_conn, step, used_tokens, known_max, equiv_token):
     """Find collisions via SQL GROUP BY, process one group at a time.
 
     1. index_new_patterns() writes template hashes to SQL (incremental)
     2. SQL finds templates that got NEW members this step (via indexing_step)
     3. Only those templates are checked — not the entire table
     4. Previously known collisions without new members are confirmed by definition
+
+    equiv_token: the opaque token for ≡, so derived patterns stay fully tokenized.
 
     Returns (new_results_for_display, confirmed_count, grew_count).
     """
@@ -482,13 +474,30 @@ def find_and_process_collisions(engine_conn, step, used_tokens, known_max):
             (new_token, f"collision-{collision_id}", step),
         )
 
-        # Derived pattern
+        # Derived pattern — tokenize wildcards so they don't leak as shared constants
         derived_weight = min(1.0, member_count / 10.0)
-        derived_triple = [new_token, "\u2261", template]
+
+        def tokenize_wildcards(expr):
+            """Replace wildcard names (_0, _1, ...) with fresh opaque tokens."""
+            if isinstance(expr, str):
+                if expr.startswith("_") and expr[1:].isdigit():
+                    wtoken = mint_token(used_tokens)
+                    ec.execute(
+                        "INSERT INTO vocabulary (token, name, origin, step) VALUES (?, ?, 'derived', ?)",
+                        (wtoken, f"wild-{expr}", step),
+                    )
+                    return wtoken
+                return expr
+            if isinstance(expr, list):
+                return [tokenize_wildcards(e) for e in expr]
+            return expr
+
+        tokenized_template = tokenize_wildcards(template)
+        derived_triple = [new_token, equiv_token, tokenized_template]
         derived_shape = compute_shape(derived_triple)
         ec.execute(
             "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, ?, ?, 'derived', ?)",
-            (json.dumps(derived_triple, ensure_ascii=False), derived_shape, "\u2261", step, step + 1, derived_weight),
+            (json.dumps(derived_triple, ensure_ascii=False), derived_shape, equiv_token, step, step + 1, derived_weight),
         )
 
         new_results.append({
@@ -502,6 +511,278 @@ def find_and_process_collisions(engine_conn, step, used_tokens, known_max):
 
         # Free parsed_vals for this group
         del parsed_vals, members
+
+    engine_conn.commit()
+    return new_results, confirmed, grew
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: Membership collision detection
+# ---------------------------------------------------------------------------
+
+def extract_collision_subjects(engine_conn, step):
+    """Extract subject tokens for collisions discovered at the current step.
+
+    The "subject" of a collision is the set of distinct triple[0] values
+    from its member patterns. Only collisions with 2+ distinct subjects
+    are indexed.
+
+    Returns count of collisions indexed.
+    """
+    ec = engine_conn.cursor()
+
+    ec.execute("""
+        SELECT c.id
+        FROM collisions c
+        WHERE c.step = ?
+        AND c.id NOT IN (SELECT DISTINCT collision_id FROM collision_subjects)
+    """, (step,))
+    new_collision_ids = [row[0] for row in ec.fetchall()]
+
+    if not new_collision_ids:
+        return 0
+
+    count = 0
+    for cid in new_collision_ids:
+        ec.execute("""
+            SELECT DISTINCT json_extract(p.triple, '$[0]') as subject
+            FROM collision_members cm
+            JOIN patterns p ON p.id = cm.pattern_id
+            WHERE cm.collision_id = ?
+        """, (cid,))
+        subjects = [row[0] for row in ec.fetchall()]
+
+        if len(subjects) < 2:
+            continue
+
+        for subj_tok in subjects:
+            ec.execute(
+                "INSERT INTO collision_subjects (collision_id, subject_token, indexing_step) VALUES (?, ?, ?)",
+                (cid, subj_tok, step),
+            )
+        count += 1
+
+    engine_conn.commit()
+    return count
+
+
+def generate_membership_hashes(engine_conn, step, max_drops=2, min_subset_size=2):
+    """Generate membership hash keys for collision subject sets.
+
+    For each collision, takes its subject set and generates canonical
+    subset keys by dropping up to max_drops members. Parallels Phase 1's
+    template generation.
+
+    Returns count of hashes generated.
+    """
+    ec = engine_conn.cursor()
+
+    ec.execute("""
+        SELECT DISTINCT cs.collision_id
+        FROM collision_subjects cs
+        WHERE cs.indexing_step = ?
+        AND cs.collision_id NOT IN (
+            SELECT DISTINCT collision_id FROM membership_hashes
+        )
+    """, (step,))
+    collision_ids = [row[0] for row in ec.fetchall()]
+
+    if not collision_ids:
+        return 0
+
+    total_hashes = 0
+    batch = []
+
+    for cid in collision_ids:
+        ec.execute(
+            "SELECT subject_token FROM collision_subjects WHERE collision_id = ?",
+            (cid,),
+        )
+        subjects = sorted(row[0] for row in ec.fetchall())
+        n = len(subjects)
+
+        if n < min_subset_size:
+            continue
+
+        seen_keys = set()
+
+        # Full set
+        full_key = json.dumps(subjects, ensure_ascii=False)
+        batch.append((cid, full_key, n, step))
+        seen_keys.add(full_key)
+
+        # Subsets by dropping up to max_drops members
+        effective_max_drops = min(max_drops, n - min_subset_size)
+        for num_drop in range(1, effective_max_drops + 1):
+            for drop_indices in combinations(range(n), num_drop):
+                subset = [subjects[i] for i in range(n) if i not in drop_indices]
+                subset_key = json.dumps(subset, ensure_ascii=False)
+                if subset_key not in seen_keys:
+                    seen_keys.add(subset_key)
+                    batch.append((cid, subset_key, len(subset), step))
+
+        if len(batch) >= 5000:
+            ec.executemany(
+                "INSERT INTO membership_hashes (collision_id, subject_set_key, subject_count, indexing_step) VALUES (?, ?, ?, ?)",
+                batch,
+            )
+            total_hashes += len(batch)
+            batch.clear()
+
+    if batch:
+        ec.executemany(
+            "INSERT INTO membership_hashes (collision_id, subject_set_key, subject_count, indexing_step) VALUES (?, ?, ?, ?)",
+            batch,
+        )
+        total_hashes += len(batch)
+
+    engine_conn.commit()
+    return total_hashes
+
+
+def get_known_membership_collisions(engine_conn):
+    """Get map of subject_set_key -> max collision_count seen so far."""
+    ec = engine_conn.cursor()
+    ec.execute("SELECT subject_set_key, MAX(collision_count) FROM membership_collisions GROUP BY subject_set_key")
+    return dict(ec.fetchall())
+
+
+def find_membership_collisions(engine_conn, step, used_tokens, known_membership_max,
+                                equiv_token, conj_token, member_of_token):
+    """Find membership collisions: groups of Phase 1 collisions sharing subjects.
+
+    Phase 1 groups patterns by template -> collisions (properties).
+    Phase 2 groups collisions by subject set -> theories (property conjunctions).
+
+    Returns (new_results, confirmed_count, grew_count).
+    """
+    ec = engine_conn.cursor()
+
+    confirmed = len(known_membership_max)
+
+    # Step 1: extract subjects for new collisions
+    extract_collision_subjects(engine_conn, step)
+
+    # Step 2: generate membership hashes
+    generate_membership_hashes(engine_conn, step)
+
+    # Step 3: find candidates — subject_set_keys that got new entries this step
+    ec.execute("""
+        SELECT mh.subject_set_key, COUNT(DISTINCT mh.collision_id) as cnt
+        FROM membership_hashes mh
+        WHERE mh.subject_set_key IN (
+            SELECT DISTINCT subject_set_key FROM membership_hashes WHERE indexing_step = ?
+        )
+        GROUP BY mh.subject_set_key
+        HAVING cnt >= 2
+    """, (step,))
+    candidates = ec.fetchall()
+
+    new_results = []
+    grew = 0
+
+    for subject_set_key, cnt in candidates:
+        ec.execute(
+            "SELECT DISTINCT collision_id FROM membership_hashes WHERE subject_set_key = ?",
+            (subject_set_key,),
+        )
+        collision_ids = sorted(row[0] for row in ec.fetchall())
+        collision_count = len(collision_ids)
+
+        subject_set = json.loads(subject_set_key)
+        subject_count = len(subject_set)
+
+        prev_max = known_membership_max.get(subject_set_key, 0)
+        if collision_count <= prev_max:
+            continue
+
+        if prev_max > 0:
+            grew += 1
+        known_membership_max[subject_set_key] = collision_count
+
+        # Mint theory token
+        theory_token = mint_token(used_tokens)
+
+        # Get output tokens of member collisions for the conjunction
+        member_collision_tokens = []
+        for cid in collision_ids:
+            ec.execute("SELECT output_token FROM collisions WHERE id = ?", (cid,))
+            row = ec.fetchone()
+            if row and row[0]:
+                member_collision_tokens.append(row[0])
+
+        if len(member_collision_tokens) < 2:
+            continue
+
+        # Right-fold conjunction: [C_a, ∧, [C_b, ∧, C_c]]
+        def build_conjunction(tokens):
+            if len(tokens) == 1:
+                return tokens[0]
+            return [tokens[0], conj_token, build_conjunction(tokens[1:])]
+
+        conj_expr = build_conjunction(member_collision_tokens)
+
+        definition = {
+            "subject_set": subject_set,
+            "collision_ids": collision_ids,
+            "collision_count": collision_count,
+            "subject_count": subject_count,
+        }
+        definition_json = json.dumps(definition, ensure_ascii=False)
+
+        ec.execute(
+            """INSERT INTO membership_collisions
+               (subject_set_key, collision_ids, collision_count, subject_count, step, output_token, definition)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (subject_set_key, json.dumps(collision_ids), collision_count, subject_count,
+             step, theory_token, definition_json),
+        )
+        mc_id = ec.lastrowid
+
+        for cid in collision_ids:
+            ec.execute(
+                "INSERT INTO membership_collision_members (membership_collision_id, collision_id) VALUES (?, ?)",
+                (mc_id, cid),
+            )
+
+        ec.execute(
+            "INSERT INTO vocabulary (token, name, origin, step) VALUES (?, ?, 'derived', ?)",
+            (theory_token, f"theory-{mc_id}", step),
+        )
+
+        # Derived patterns
+        derived_weight = min(1.0, (collision_count * subject_count) / 20.0)
+
+        # Pattern 1: Theory definition [theory, ≡, conjunction]
+        theory_triple = [theory_token, equiv_token, conj_expr]
+        theory_shape = compute_shape(theory_triple)
+        ec.execute(
+            "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, ?, ?, 'derived', ?)",
+            (json.dumps(theory_triple, ensure_ascii=False), theory_shape, equiv_token,
+             step, step + 1, derived_weight),
+        )
+
+        # Pattern 2: Membership assertions [subject, ∈, theory]
+        for subj_tok in subject_set:
+            membership_triple = [subj_tok, member_of_token, theory_token]
+            membership_shape = compute_shape(membership_triple)
+            ec.execute(
+                "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, ?, ?, 'derived', ?)",
+                (json.dumps(membership_triple, ensure_ascii=False), membership_shape,
+                 member_of_token, step, step + 1, derived_weight * 0.5),
+            )
+
+        new_results.append({
+            "mc_id": mc_id,
+            "token": theory_token,
+            "subject_set": subject_set,
+            "collision_ids": collision_ids,
+            "collision_count": collision_count,
+            "subject_count": subject_count,
+            "grew_from": prev_max if prev_max > 0 else None,
+        })
+
+        del collision_ids, subject_set, member_collision_tokens
 
     engine_conn.commit()
     return new_results, confirmed, grew
