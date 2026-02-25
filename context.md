@@ -48,17 +48,19 @@ Two-phase collision engine discovers algebraic structures bottom-up.
 
 The two phases bootstrap each other: P1 properties → P2 theories → derived patterns → new P1 properties → new P2 theories → ...
 
-**Run results (killed at step 4/P1 due to 30GB disk):**
+**Run results (latest: OOM during step 4/P2 at 57GB):**
 
-| Step | P1 collisions | P2 theories |
-|------|--------------|-------------|
-| 0 | 172 | 107 |
-| 1 | 232 | 372 |
-| 2 | 748 | 754 |
-| 3 | 1,232 | 2,904 |
-| 4 | 4,314 | — |
+| Step | P1 collisions | P2 theories | Time |
+|------|--------------|-------------|------|
+| 0 | 172 | 107 | 2.6s |
+| 1 | 232 | 372 | 1.1s |
+| 2 | 749 | 760 | 6.2s |
+| 3 | 1,237 | 2,922 | 177s |
+| 4 | 4,343 | OOM | — |
 
-Totals: 6,698 collisions, 4,137 theories, 20,222 vocabulary entries.
+Totals: 6,733 collisions, 4,161 theories, 20,300 vocabulary entries.
+
+**OOM root cause:** P2 loads all candidate membership groups via `fetchall()` — O(n²) in collision count due to subset-key sharing. Combined with `PRAGMA temp_store=MEMORY` forcing SQLite GROUP BY temp tables into RAM. Fixable by: (1) `temp_store=FILE`, (2) cursor streaming instead of fetchall, (3) push grouping logic into SQL so data never enters Python.
 
 **Step 0 discoveries (within-domain):**
 - Monoid {+,×,∘,⊻} from shared associativity ∧ identity
@@ -97,7 +99,23 @@ Bootstrap steps compound structural evidence. Cross-domain pairs strengthen mono
   (κ for ∧/∩, ω for ∨/∪) are valid when they represent the same abstract concept
 - **≡ is not =**: ≡ ("is defined as") is structural, = ("equals") is semantic
 
+## Next: Simulation Architecture
+
+The engine is a simulation pretending to be an algorithm. It applies local structural rules (template match, membership overlap) and observes emergent behaviour. The current SQL-query-loop implementation obscures this.
+
+**Proposed rewrite as GPU simulation:**
+- Each pattern = particle. Each collision = cluster. Each theory = higher-order cluster.
+- Rules: same template hash → attract (P1). Overlapping membership → attract (P2). New cluster → emit derived patterns.
+- Maps to GPU collision detection: broad phase (spatial hash), narrow phase (membership overlap), resolution (emit theories), integration (derived patterns enter world).
+- "Steps" dissolve — no explicit P1→P2→loop, just continuous ticks until convergence.
+- SQL becomes save/load (persistence), not the compute layer. VRAM is the model.
+- Framework candidate: Taichi (Python-native GPU simulation DSL, compiles to CUDA).
+
+**Path:** Fix OOM first (get step 4+ data) → prototype simulation → if equivalent results, simulation becomes the engine.
+
 ## Status
 
 - 0 forward references across all 15 layers (verified by `tools/validate.py`)
 - `ontology.db` rebuilt from layers via `tools/build_db.py`
+- PHILOSOPHY.md updated: choices→consequences hierarchy, lone reasoner, pattern-matching-is-reasoning
+- Engine OOM diagnosed, fix planned, simulation architecture sketched

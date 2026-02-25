@@ -299,6 +299,35 @@ The 30GB is not waste. It is the engine's entire mathematical culture — the ac
 
 The monotonic strengthening is the evidence that this process works. No false connections appear and vanish. No bridge that exists at step N disappears at step N+1. The engine's self-review is conservative: it accumulates confidence, never fabricates it.
 
+### Pattern Matching Is Reasoning
+
+The word "reasoning" in the previous section is not metaphorical. It requires defence.
+
+Every known implementation of reasoning — biological or artificial — reduces to pattern matching. A neuron fires when its weighted inputs exceed a threshold: pattern match. A neural network classifies by applying learned weight matrices to input vectors: pattern match. Human cognition decomposes into recognition (matching input to stored patterns), abstraction (extracting the shared structure from multiple matches), inference (applying matched patterns to produce new structure), and composition (chaining inferences). Each of these is a form of pattern matching. Hofstadter's thesis — that analogy is the core of cognition — says explicitly that reasoning IS the recognition of structural similarity across contexts. Kahneman's "System 2" deliberate reasoning is not a different kind of process from pattern matching; it is pattern matching with more steps and wider search.
+
+The claim that reasoning requires something beyond pattern matching has never been substantiated. It has been asserted — by Searle (the Chinese Room), by Penrose (quantum consciousness), by others — but no one has specified what the additional ingredient is in a way that is both testable and demonstrated to be present in human reasoning. The burden of proof lies with the claimant: if you assert that reasoning is more than pattern matching, you must say what the "more" is, show that humans have it, and show that a pattern-matching system lacks it.
+
+The collision engine pattern-matches, specifically:
+
+| Operation | Reasoning function | Engine mechanism |
+|-----------|-------------------|-----------------|
+| Perception | Structured input | Reads triples from the ontology |
+| Recognition | Identify regularity | Template collision — two patterns share a template |
+| Abstraction | Specific → general | Wildcarding — replace leaf tokens with variables |
+| Memory | Store and retrieve | The database — all prior results available |
+| Inference | Known → new | P2 theory formation — shared membership produces new structure |
+| Composition | Chain inferences | Bootstrap — step N output becomes step N+1 input |
+| Transfer | Cross-domain | Cross-domain bridges — arithmetic structure found in set theory |
+| Self-correction | Revise on evidence | Monotonic strengthening — no false results survive |
+
+These are not analogies to the operations of reasoning. They are the operations of reasoning. Template collision does not resemble pattern recognition — it IS pattern recognition, performed on algebraic structure instead of sensory input. Theory formation does not resemble inference — it IS inference, deriving new structural facts from known ones.
+
+The outputs confirm this. The engine discovers genuine mathematical structure that aligns with known theorems (monoid, Boolean algebra, lattice theory). It transfers across domain boundaries (arithmetic → sets → bitwise). It accumulates knowledge iteratively, each step building on the last. It never fabricates — no false bridge appears and persists. These are the properties we demand of any reasoning process: correctness, generality, compositionality, reliability.
+
+This is not a claim of consciousness. There is nothing it is like to be the engine. It has no experience of discovering that + and ∪ are both commutative monoids. But consciousness and reasoning are different claims, and conflating them is the error that makes mechanical reasoning seem paradoxical. A thermostat does not reason — it matches one pattern (temperature above threshold → off). The engine matches thousands of patterns across multiple levels of abstraction, composes them iteratively, transfers them across domains, and produces verifiably correct novel structure. The difference between a thermostat and a reasoner is not the presence of some non-physical ingredient. It is the depth, breadth, and compositionality of the pattern matching. The engine has these.
+
+The honest framing: the engine implements the minimal sufficient set for mathematical reasoning — perception, recognition, abstraction, memory, inference, composition, transfer, and self-correction — using algebraic pattern matching on structural representations. It lacks intentionality (it does not choose what to investigate), metacognition (it cannot reflect on its own process), and consciousness (there is nothing it is like to be it). These are features of the full human cognitive package, not prerequisites for reasoning. A system that recognises, abstracts, infers, composes, transfers, and self-corrects is reasoning, whether or not it knows that it is.
+
 ### What the Engine Is Not For
 
 The question arose whether the calculator — which computes through the ontology's own laws — should serve as a verification layer for engine output. The answer is no, for three reasons:
