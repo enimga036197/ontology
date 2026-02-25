@@ -26,7 +26,7 @@
 | `σ` | Successor | `["σ", n]` = n + 1 (Peano) |
 | `π` | Position | Encodes triple positions |
 
-## Logic (Layer 1)
+## Logic (Layer 2)
 
 | Symbol | Name | Type |
 |--------|------|------|
@@ -36,7 +36,14 @@
 | `⇒` | Implication | `𝓛 × 𝓛 → 𝓛` |
 | `⇔` | Biconditional | `𝓛 × 𝓛 → 𝓛` |
 
-## Arithmetic (Layer 3)
+## Quantifiers (Layer 1)
+
+| Symbol | Name | Usage |
+|--------|------|-------|
+| `∀` | Universal | `["∀", var, predicate]` |
+| `∃` | Existential | `["∃", var, predicate]` |
+
+## Arithmetic (Layer 5)
 
 | Symbol | Name | Type |
 |--------|------|------|
@@ -49,27 +56,9 @@
 | `\|` | Divisibility | `Δ × Δ → 𝓛` |
 | `<` | Less than | `Δ × Δ → 𝓛` |
 | `>` | Greater than | `Δ × Δ → 𝓛` |
-| `≤` | Less or equal | `Δ × Δ → 𝓛` |
 | `≥` | Greater or equal | `Δ × Δ → 𝓛` |
 
-## Quantifiers (Layer 5)
-
-| Symbol | Name | Usage |
-|--------|------|-------|
-| `∀` | Universal | `["∀", var, predicate]` |
-| `∃` | Existential | `["∃", var, predicate]` |
-
-## Functions (Layer 6)
-
-| Symbol | Name | Type |
-|--------|------|------|
-| `∂` | Application | `(a→b) × a → b` |
-| `∘` | Composition | `(b→c) × (a→b) → (a→c)` |
-| `ℑ` | Identity | `a → a` |
-| `→` | Function type | Type constructor |
-| `⊗` | Product type | Type constructor |
-
-## Sets (Layer 4)
+## Sets (Layer 6)
 
 | Symbol | Name | Type |
 |--------|------|------|
@@ -80,6 +69,16 @@
 | `∩` | Intersection | `𝒮 × 𝒮 → 𝒮` |
 | `{` | Set constructor | Delimiter |
 
+## Functions (Layer 7)
+
+| Symbol | Name | Type |
+|--------|------|------|
+| `∂` | Application | `(a→b) × a → b` |
+| `∘` | Composition | `(b→c) × (a→b) → (a→c)` |
+| `ℑ` | Identity | `a → a` |
+| `→` | Function type | Type constructor |
+| `⊗` | Product type | Type constructor |
+
 ## Bitwise (Layer 9)
 
 | Symbol | Name | Type |
@@ -89,7 +88,7 @@
 | `≫` | Right shift | `Δ × Δ → Δ` |
 | `⊙` | Bit extract | `Δ × Δ → 𝔹` |
 
-## Typing (Layer 10)
+## Typing (Layer 12)
 
 | Symbol | Name | Meaning |
 |--------|------|---------|

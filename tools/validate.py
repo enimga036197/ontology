@@ -5,8 +5,8 @@ from pathlib import Path
 
 LAYERS_DIR = Path(__file__).parent.parent / "layers"
 
-# Valid middle-position operators
-VALID_OPERATORS = {"⊨", "⌂", "≡", "↦", "ℒ", "=", "≠", "⊏", "⋔"}
+# Valid middle-position operators (all operators that appear in the operator slot of triples)
+VALID_OPERATORS = {"⊨", "⌂", "≡", "↦", "ℒ", "=", "≠", "⊏", "⋔", "!", "?", "𝕧", "Ϛ", "ℛ", "⇒"}
 
 
 def validate_triple(triple, file, line_num):
@@ -24,6 +24,8 @@ def validate_triple(triple, file, line_num):
         errors.append(f"{file}:{line_num}: subject must be string or list, got {type(subject).__name__}")
     if not isinstance(operator, str):
         errors.append(f"{file}:{line_num}: operator must be string, got {type(operator).__name__}")
+    elif operator not in VALID_OPERATORS:
+        errors.append(f"{file}:{line_num}: unknown operator '{operator}'")
 
     return errors
 

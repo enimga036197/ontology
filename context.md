@@ -11,7 +11,7 @@ Previous iterations in neuro-symbolic-llm, GCRE, maths-ai, compiled-ontology are
 
 - `layers/` — 15 JSONL files (L00-L14), ordered by strict dependency (no forward references)
 - `spec/` — Format and operator reference
-- `tools/` — build_db.py, gen_tokens.py, validation scripts
+- `tools/` — build_db.py, validate.py, stats.py, calc.py, gen_tokens.py
 - `engine/` — Collision engine (core.py, run.py)
 - `symbols.json` — All 215 symbols with names, roles, and opaque tokens
 - `ontology.db` — Built from layers by build_db.py
@@ -20,7 +20,7 @@ Previous iterations in neuro-symbolic-llm, GCRE, maths-ai, compiled-ontology are
 
 | # | File | Domain | Triples |
 |---|------|--------|---------|
-| 00 | axioms | Existence, meta-relations, definitions | 51 |
+| 00 | axioms | Existence, meta-relations, definitions | 50 |
 | 01 | variables | Quantifiers, variable declarations | 12 |
 | 02 | logic | Propositional connectives + laws, ∀/∃ duality | 18 |
 | 03 | core_laws | = reflexivity, Σ, ∅, 𝟙, σ laws | 7 |
@@ -48,24 +48,47 @@ Two-phase collision engine discovers algebraic structures bottom-up.
 
 The two phases bootstrap each other: P1 properties → P2 theories → derived patterns → new P1 properties → new P2 theories → ...
 
-**Bug fixes (2026-02-25):**
-- Fixed derived patterns using literal ≡ glyph instead of opaque token
-- Fixed wildcard name leakage (_0, _1, _2 leaked as shared constants → 234 false collisions/step)
-- Both now use freshly minted opaque tokens
+**Run results (killed at step 4/P1 due to 30GB disk):**
 
-**Run results (10 steps, killed at step 3 due to 30GB disk):**
-- Step 0: 172 P1 collisions, 107 P2 theories
-- Step 1: 221 new P1, 265 new P2 (bootstrap confirmed)
-- Step 2: 653 new P1, 382 new P2
-- Step 3: 1058 new P1, 2150 new P2 (94 seconds)
-- Exponential growth — engine discovers monoid structure, Boolean algebra, type hierarchies, variable interchangeability, meta-theories (theories about theories)
-- Three abstraction levels: symbols → properties → theories → meta-theories
+| Step | P1 collisions | P2 theories |
+|------|--------------|-------------|
+| 0 | 172 | 107 |
+| 1 | 232 | 372 |
+| 2 | 748 | 754 |
+| 3 | 1,232 | 2,904 |
+| 4 | 4,314 | — |
 
-**Key discoveries:**
-- Monoid {+,×,∘,⊻} from shared associativity ∧ identity ∧ law-property
-- Boolean algebra {∨,∧,⊻,⇒,⊤,⊥,¬,⇔} from truth-table properties
-- Variable interchangeability {𝒶,𝒷,𝒸,𝒹,𝓀,𝓃,ℓ} — substitution principle from pure structure
+Totals: 6,698 collisions, 4,137 theories, 20,222 vocabulary entries.
+
+**Step 0 discoveries (within-domain):**
+- Monoid {+,×,∘,⊻} from shared associativity ∧ identity
+- Commutative monoid {+,×,⊻} (correctly excludes ∘)
+- Boolean algebra {∨,∧,⊻} from 8 shared truth-table properties
+- Set lattice {∩,∪} from idempotency, element characterization, functor law
+- Identity spectrum: `∀𝒶: op(𝒶, X) = 𝒶` unifies identity (+/∅, ×/𝟙) with idempotency (∩/𝒶, ∪/𝒶) — 9 members
+- ∅-duality: `∀𝒶: op(𝒶, ∅) = X` splits into identity {+,∪,≪,gcd} and annihilation {×,∩}
+- Functor identity law: `∂(ℑ,𝒶) = 𝒶` collides with `map(ℑ,𝒶) = 𝒶` — same template
+- Variable interchangeability {𝒶,𝒷,𝒸,𝒹,𝓀,𝓃,ℓ} — substitution principle from structure
 - Type system backbone {Δ,ρ,θ,=,Κ} sharing 10 properties
+
+**Step 1+ discoveries (cross-domain bridges):**
+
+Bootstrap steps compound structural evidence. Cross-domain pairs strengthen monotonically:
+
+| Pair | Domains | s0 | s1 | s2 | s3 |
+|------|---------|----|----|----|----|
+| + ~ ∪ | 𝓐×𝓢 | — | 2 | 11 | 22 |
+| + ~ ⊻ | 𝓐×𝓑 | 5 | 9 | 13 | 17 |
+| ≪ ~ + | 𝓐×𝓑 | — | 2 | 11 | 22 |
+| × ~ ∩ | 𝓐×𝓢 | — | — | 7 | 18 |
+| gcd ~ ∩ | 𝓝×𝓢 | — | — | 6 | 17 |
+| gcd ~ + | 𝓝×𝓐 | — | 4 | 13 | 24 |
+
+- **∅-identity family** {≪,gcd,+,∪} spans 3 domains at step 1; grows to {≪,gcd,∩,×,+,∪} across 4 domains by step 3
+- **× ~ ∩** emerges at step 2: annihilation at ∅ (both are lattice meets in their respective structures)
+- **+ ~ ∪** emerges at step 1: shared ∅-identity (both are commutative monoids with empty as neutral)
+- **gcd ~ ∩** reaches 17 properties: both are meet operations (divisibility lattice / subset lattice)
+- **ℛₘ groups with arithmetic**: type Δ×Δ→Δ reveals modular reading as structurally a binary arithmetic operator
 
 ## Ethos
 
@@ -76,6 +99,5 @@ The two phases bootstrap each other: P1 properties → P2 theories → derived p
 
 ## Status
 
-- Layer restructure complete (2025-02-23) — fixed 5 forward-reference violations
-- Sub-tree wildcarding removed in favor of leaf-only
-- Audit verified: 0 forward references across all 15 layers
+- 0 forward references across all 15 layers (verified by `tools/validate.py`)
+- `ontology.db` rebuilt from layers via `tools/build_db.py`

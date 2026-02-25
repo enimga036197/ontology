@@ -40,10 +40,16 @@ The middle position determines the statement type:
 | `⊏` | Domain-of | `["¬", "⊏", "𝓛"]` |
 | `⋔` | Domain-compatible | `["𝓕", "⋔", "𝓛"]` |
 | `≠` | Not equal | `["⊥", "≠", "⊤"]` |
+| `!` | Assertion | `["Ⓢ", "!", "⊤"]` |
+| `?` | Query | `["Ⓡ", "?", "⊤"]` |
+| `𝕧` | Variable-marker | `["𝒶", "𝕧", "⊤"]` |
+| `Ϛ` | Digit-successor | `["0", "Ϛ", "1"]` |
+| `ℛ` | Reading | `["0", "ℛ", "∅"]` |
+| `⇒` | Implication | `["?", "⇒", "!"]` |
 
 ## Layer Ordering
 
-Files are numbered `00`-`13`. Each layer may reference symbols defined in earlier layers.
+Files are numbered `00`-`14` (15 layers). Each layer may reference symbols defined in earlier layers.
 Layer 00 (foundation) is self-referential by design.
 
 ## Encoding
