@@ -9,14 +9,20 @@ Previous iterations in neuro-symbolic-llm, GCRE, maths-ai, compiled-ontology are
 
 ## Structure
 
-- `layers/` — 15 JSONL files (L00-L14), ordered by strict dependency (no forward references)
-- `spec/` — Format and operator reference
+- `sets/main/` — The main ontology set (mathematics from axioms through algebra)
+  - `layers/` — 15 content layers (L00-L14) + 5 law-pass layers (.5), strict dependency order
+  - `symbols.json` — 215 symbols with names, roles, and opaque tokens
+  - `ontology.db` — Built from layers by build_db.py
+  - `engine.db` — Engine output
 - `tools/` — build_db.py, validate.py, stats.py, calc.py, gen_tokens.py
-- `engine/` — Collision engine (core.py, run.py)
-- `symbols.json` — All 215 symbols with names, roles, and opaque tokens
-- `ontology.db` — Built from layers by build_db.py
+- `engine/` — Collision engine (core.py, run.py) + analysis scripts
+- `docs/` — Guide, engine reference, philosophy
 
-## Layers
+## Ontology Sets
+
+Each set in `sets/` is self-contained: layers, symbols, databases. The engine is domain-agnostic — point it at any set via `--set <name>` or `ONTOLOGY_SET=<name>`.
+
+## Layers (main set)
 
 | # | File | Domain | Triples |
 |---|------|--------|---------|
@@ -25,18 +31,23 @@ Previous iterations in neuro-symbolic-llm, GCRE, maths-ai, compiled-ontology are
 | 02 | logic | Propositional connectives + laws, ∀/∃ duality | 18 |
 | 03 | core_laws | = reflexivity, Σ, ∅, 𝟙, σ laws | 7 |
 | 04 | types | Type constructors: [, 𝒮, 𝕊, ⊗, ++ | 6 |
-| 05 | arithmetic | +, ×, ^, <, >, -, ÷, |, % | 27 |
+| 05 | arithmetic | +, ×, ^, <, >, -, ÷, |, % | 29 |
+| 05.5 | arithmetic_laws | assoc, commut, hasId, distrib defs + compact forms | 11 |
 | 06 | sets | ∈, ∉, ⊂, {, ∪, ∩ | 14 |
-| 07 | functions | ∂, ∘, ⁻, ℑ, ⟷ | 14 |
+| 06.5 | set_laws | closes def, compact forms | 2 |
+| 07 | functions | ∂, ∘, ⁻, ℑ, ⟷ | 15 |
+| 07.5 | function_laws | Compact forms for ∘ | 2 |
 | 08 | response | Ⓢ, Ⓡ, □, ◊, modality | 26 |
 | 09 | bitwise | 𝔹, ⊻, ≪, ≫ | 19 |
+| 09.5 | bitwise_laws | hasInv def, compact forms for ⊻ | 5 |
 | 10 | sequences | ⦃, ⦄, #, @, map, fold, etc. | 47 |
 | 11 | numerals | 𝔻, ℛ, digit-Peano bridge | 23 |
 | 12 | typing | ⊏ domain assignments, ⋔ associations | 41 |
 | 13 | number_theory | ≅, gcd, lcm, ϕ, ℙ, ⟂ | 31 |
-| 14 | algebra | Groups, semirings, homomorphisms | 35 |
+| 13.5 | number_theory_laws | Compact forms for gcd, lcm | 3 |
+| 14 | algebra | Magma→Abelian hierarchy, semirings, homomorphisms | 16 |
 
-Total: 370 triples, 215 symbols, 15 layers.
+Total: ~377 triples, 215 symbols, 20 layers.
 
 ## Engine
 
@@ -44,53 +55,14 @@ Two-phase collision engine discovers algebraic structures bottom-up.
 
 **Phase 1 (Template Collisions):** Leaf-only wildcarding of pattern triples. Groups patterns sharing the same template → discovers PROPERTIES.
 
-**Phase 2 (Membership Collisions):** Finds groups of P1 collisions sharing member symbols → discovers THEORIES (conjunctions of properties). Emits `[token, ≡, [C_a, ∧, C_b]]` definitions + `[subject, ∈, theory_token]` membership assertions.
+**Phase 2 (Membership Collisions):** Finds groups of P1 collisions sharing member symbols → discovers THEORIES (conjunctions of properties). Emits definitions + membership assertions.
 
 The two phases bootstrap each other: P1 properties → P2 theories → derived patterns → new P1 properties → new P2 theories → ...
 
-**Run results (latest: OOM during step 4/P2 at 57GB):**
-
-| Step | P1 collisions | P2 theories | Time |
-|------|--------------|-------------|------|
-| 0 | 172 | 107 | 2.6s |
-| 1 | 232 | 372 | 1.1s |
-| 2 | 749 | 760 | 6.2s |
-| 3 | 1,237 | 2,922 | 177s |
-| 4 | 4,343 | OOM | — |
-
-Totals: 6,733 collisions, 4,161 theories, 20,300 vocabulary entries.
-
-**OOM root cause:** P2 loads all candidate membership groups via `fetchall()` — O(n²) in collision count due to subset-key sharing. Combined with `PRAGMA temp_store=MEMORY` forcing SQLite GROUP BY temp tables into RAM. Fixable by: (1) `temp_store=FILE`, (2) cursor streaming instead of fetchall, (3) push grouping logic into SQL so data never enters Python.
-
-**Step 0 discoveries (within-domain):**
-- Monoid {+,×,∘,⊻} from shared associativity ∧ identity
-- Commutative monoid {+,×,⊻} (correctly excludes ∘)
-- Boolean algebra {∨,∧,⊻} from 8 shared truth-table properties
-- Set lattice {∩,∪} from idempotency, element characterization, functor law
-- Identity spectrum: `∀𝒶: op(𝒶, X) = 𝒶` unifies identity (+/∅, ×/𝟙) with idempotency (∩/𝒶, ∪/𝒶) — 9 members
-- ∅-duality: `∀𝒶: op(𝒶, ∅) = X` splits into identity {+,∪,≪,gcd} and annihilation {×,∩}
-- Functor identity law: `∂(ℑ,𝒶) = 𝒶` collides with `map(ℑ,𝒶) = 𝒶` — same template
-- Variable interchangeability {𝒶,𝒷,𝒸,𝒹,𝓀,𝓃,ℓ} — substitution principle from structure
-- Type system backbone {Δ,ρ,θ,=,Κ} sharing 10 properties
-
-**Step 1+ discoveries (cross-domain bridges):**
-
-Bootstrap steps compound structural evidence. Cross-domain pairs strengthen monotonically:
-
-| Pair | Domains | s0 | s1 | s2 | s3 |
-|------|---------|----|----|----|----|
-| + ~ ∪ | 𝓐×𝓢 | — | 2 | 11 | 22 |
-| + ~ ⊻ | 𝓐×𝓑 | 5 | 9 | 13 | 17 |
-| ≪ ~ + | 𝓐×𝓑 | — | 2 | 11 | 22 |
-| × ~ ∩ | 𝓐×𝓢 | — | — | 7 | 18 |
-| gcd ~ ∩ | 𝓝×𝓢 | — | — | 6 | 17 |
-| gcd ~ + | 𝓝×𝓐 | — | 4 | 13 | 24 |
-
-- **∅-identity family** {≪,gcd,+,∪} spans 3 domains at step 1; grows to {≪,gcd,∩,×,+,∪} across 4 domains by step 3
-- **× ~ ∩** emerges at step 2: annihilation at ∅ (both are lattice meets in their respective structures)
-- **+ ~ ∪** emerges at step 1: shared ∅-identity (both are commutative monoids with empty as neutral)
-- **gcd ~ ∩** reaches 17 properties: both are meet operations (divisibility lattice / subset lattice)
-- **ℛₘ groups with arithmetic**: type Δ×Δ→Δ reveals modular reading as structurally a binary arithmetic operator
+**Recent changes:**
+- Specificity weighting (`56a0746`): P2 scoring uses `sum(1.0/member_count)` instead of raw collision count
+- .5 law-pass layers (`f3bf372`): Law-concepts distributed to first-instance layers
+- Multi-set support (`75f7d65`): Ontology sets in `sets/`, resolved via `ONTOLOGY_SET` env var
 
 ## Ethos
 
@@ -98,24 +70,12 @@ Bootstrap steps compound structural evidence. Cross-domain pairs strengthen mono
 - **Symbol uniqueness**: each concept atom represents one concept; shared atoms across domains
   (κ for ∧/∩, ω for ∨/∪) are valid when they represent the same abstract concept
 - **≡ is not =**: ≡ ("is defined as") is structural, = ("equals") is semantic
-
-## Next: Simulation Architecture
-
-The engine is a simulation pretending to be an algorithm. It applies local structural rules (template match, membership overlap) and observes emergent behaviour. The current SQL-query-loop implementation obscures this.
-
-**Proposed rewrite as GPU simulation:**
-- Each pattern = particle. Each collision = cluster. Each theory = higher-order cluster.
-- Rules: same template hash → attract (P1). Overlapping membership → attract (P2). New cluster → emit derived patterns.
-- Maps to GPU collision detection: broad phase (spatial hash), narrow phase (membership overlap), resolution (emit theories), integration (derived patterns enter world).
-- "Steps" dissolve — no explicit P1→P2→loop, just continuous ticks until convergence.
-- SQL becomes save/load (persistence), not the compute layer. VRAM is the model.
-- Framework candidate: Taichi (Python-native GPU simulation DSL, compiles to CUDA).
-
-**Path:** Fix OOM first (get step 4+ data) → prototype simulation → if equivalent results, simulation becomes the engine.
+- **Don't name what the engine should discover**: the engine's scope is correctness, not human categories
 
 ## Status
 
-- 0 forward references across all 15 layers (verified by `tools/validate.py`)
-- `ontology.db` rebuilt from layers via `tools/build_db.py`
-- PHILOSOPHY.md updated: choices→consequences hierarchy, lone reasoner, pattern-matching-is-reasoning
-- Engine OOM diagnosed, fix planned, simulation architecture sketched
+- 0 forward references across all layers (verified by `tools/validate.py`)
+- `ontology.db` rebuilt from layers via `tools/build_db.py` (377 triples)
+- Engine: specificity weighting + .5 law-pass layers committed
+- Multi-set support: `sets/main/` structure, `--set` flag on all tools
+- Docs reorganized: `docs/guide.md`, `docs/engine.md`, `docs/philosophy.md`

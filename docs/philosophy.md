@@ -255,29 +255,29 @@ Step 0 also discovers two patterns that look wrong but are mathematically right:
 
 **The ∅-duality.** Template `∀𝒶: op(𝒶, ∅) = X` groups six operations: {+, ∪, ≪, gcd} where ∅ is the identity (X = 𝒶), and {×, ∩} where ∅ is the annihilator (X = ∅). The engine groups identity and annihilation because the template shape is the same: "what does this operation do with ∅?" The wildcard absorbs the distinction. This is the additive/multiplicative duality of ring theory, seen from the outside.
 
-### Steps 1–3: Cross-Domain Bridges
+### Steps 1-3: Cross-Domain Bridges
 
 The bootstrap mechanism compounds structural evidence through shared theory membership. Cross-domain connections that are invisible at step 0 emerge and strengthen monotonically:
 
 | Pair | Domains | Step 0 | Step 1 | Step 2 | Step 3 |
 |------|---------|--------|--------|--------|--------|
-| + ~ ∪ | 𝓐 × 𝓢 | — | 2 | 11 | **22** |
-| + ~ ⊻ | 𝓐 × 𝓑 | 5 | 9 | 13 | **17** |
-| ≪ ~ + | 𝓐 × 𝓑 | — | 2 | 11 | **22** |
-| ≪ ~ ∪ | 𝓢 × 𝓑 | — | 2 | 11 | **22** |
-| × ~ ∩ | 𝓐 × 𝓢 | — | — | 7 | **18** |
-| gcd ~ ∩ | 𝓝 × 𝓢 | — | — | 6 | **17** |
-| gcd ~ + | 𝓝 × 𝓐 | — | 4 | 13 | **24** |
+| + ~ ∪ | Arith x Sets | -- | 2 | 11 | **22** |
+| + ~ ⊻ | Arith x Bits | 5 | 9 | 13 | **17** |
+| ≪ ~ + | Arith x Bits | -- | 2 | 11 | **22** |
+| ≪ ~ ∪ | Sets x Bits | -- | 2 | 11 | **22** |
+| x ~ ∩ | Arith x Sets | -- | -- | 7 | **18** |
+| gcd ~ ∩ | NumTh x Sets | -- | -- | 6 | **17** |
+| gcd ~ + | NumTh x Arith | -- | 4 | 13 | **24** |
 
 No false connections appear and vanish. The strengthening is monotonic.
 
-**+ ~ ∪** (arithmetic × sets): Invisible at step 0 — addition and union share no direct laws. At step 1, shared theory membership reveals 2 common properties. By step 3, 22. Both have ∅ as identity, both are commutative, both accumulate. This corresponds to the categorical fact that (ℕ, +, 0) and (𝒫(X), ∪, ∅) are both commutative monoids. The engine discovers the addition-union isomorphism.
+**+ ~ ∪** (arithmetic x sets): Invisible at step 0 — addition and union share no direct laws. At step 1, shared theory membership reveals 2 common properties. By step 3, 22. Both have ∅ as identity, both are commutative, both accumulate. This corresponds to the categorical fact that (N, +, 0) and (P(X), ∪, ∅) are both commutative monoids. The engine discovers the addition-union isomorphism.
 
-**× ~ ∩** (arithmetic × sets): Does not appear until step 2. Their shared property is annihilation at ∅: ×(𝒶, ∅) = ∅ and ∩(𝒶, ∅) = ∅. Both are lattice meets — multiplication in the divisibility lattice, intersection in the subset lattice. The engine finds this without knowing what a lattice is.
+**x ~ ∩** (arithmetic x sets): Does not appear until step 2. Their shared property is annihilation at ∅: x(a, ∅) = ∅ and ∩(a, ∅) = ∅. Both are lattice meets — multiplication in the divisibility lattice, intersection in the subset lattice. The engine finds this without knowing what a lattice is.
 
-**gcd ~ ∩** (number theory × sets): 17 shared properties by step 3. GCD on natural numbers and intersection on sets are both **meet** operations: gcd(a,b) = inf(a,b) in the divisibility lattice, ∩(A,B) = inf(A,B) in the subset lattice. The engine discovers lattice theory bottom-up.
+**gcd ~ ∩** (number theory x sets): 17 shared properties by step 3. GCD on natural numbers and intersection on sets are both **meet** operations: gcd(a,b) = inf(a,b) in the divisibility lattice, ∩(A,B) = inf(A,B) in the subset lattice. The engine discovers lattice theory bottom-up.
 
-**The three-domain bridge**: At step 1, {≪, gcd, +, ∪} forms a theory spanning arithmetic, sets, and bitwise operations — the ∅-identity family. By step 3, this grows to {≪, gcd, ∩, ×, +, ∪} spanning four domains. Six operations, four formal domains, one structural pattern: behaviour at ∅ partitions them into identity {+, ∪, ≪, gcd} and annihilation {×, ∩}. This is ring theory's additive/multiplicative duality, discovered across domain boundaries from pure template collision.
+**The three-domain bridge**: At step 1, {≪, gcd, +, ∪} forms a theory spanning arithmetic, sets, and bitwise operations — the ∅-identity family. By step 3, this grows to {≪, gcd, ∩, x, +, ∪} spanning four domains. Six operations, four formal domains, one structural pattern: behaviour at ∅ partitions them into identity {+, ∪, ≪, gcd} and annihilation {x, ∩}. This is ring theory's additive/multiplicative duality, discovered across domain boundaries from pure template collision.
 
 The participation profile is itself data. Across all steps, ⊤ (truth/validity) has 497 theory memberships — the most connected symbol. The foundation backbone {=, τ, Ο, Τ, Δ, ρ, θ, Κ} are locked at 322 each. All 7 variables are locked at 205 each. + sits at 301, × at 297. These counts measure structural centrality: how many algebraic contexts each symbol participates in.
 
@@ -293,9 +293,9 @@ The engine is alone. It has no peers, no external applications, no independent v
 
 **Productivity is utility.** If step N theories enable step N+1 discoveries that are themselves structurally consistent, the step N theories are validated by what they make possible. The +~∪ bridge has 2 shared properties at step 1 and 22 at step 3. Those 22 were not invented — they were built, each one standing on the previous step's accumulation. The 22 at step 3 is the utility proof that the 2 at step 1 were real.
 
-**Cross-domain agreement is independent verification.** When arithmetic and set theory produce the same template from different starting triples, that is two independent lines of evidence converging. The engine cannot ask a colleague to check its work, but it can find that work done in one domain confirms work done in another. The ×~∩ bridge — discovered at step 2, strengthened to 18 shared properties by step 3 — is multiplication and intersection independently testifying that they are both lattice meets. Neither "knows" about the other. Their agreement is the engine's equivalent of independent replication.
+**Cross-domain agreement is independent verification.** When arithmetic and set theory produce the same template from different starting triples, that is two independent lines of evidence converging. The engine cannot ask a colleague to check its work, but it can find that work done in one domain confirms work done in another. The x~∩ bridge — discovered at step 2, strengthened to 18 shared properties by step 3 — is multiplication and intersection independently testifying that they are both lattice meets. Neither "knows" about the other. Their agreement is the engine's equivalent of independent replication.
 
-The 30GB is not waste. It is the engine's entire mathematical culture — the accumulated knowledge base that makes each next step possible. Without 748 collisions at step 2, there is not enough structural context for 1,232 at step 3, and the ×~∩ bridge never appears. A human mathematician does not carry all of mathematics in their head, but the field does — distributed across papers, textbooks, conversations, traditions. The engine must carry all of it in one database because it has no community. The exponential growth is the cost of being a lone reasoner who must be its own entire mathematical tradition.
+The 30GB is not waste. It is the engine's entire mathematical culture — the accumulated knowledge base that makes each next step possible. Without 748 collisions at step 2, there is not enough structural context for 1,232 at step 3, and the x~∩ bridge never appears. A human mathematician does not carry all of mathematics in their head, but the field does — distributed across papers, textbooks, conversations, traditions. The engine must carry all of it in one database because it has no community. The exponential growth is the cost of being a lone reasoner who must be its own entire mathematical tradition.
 
 The monotonic strengthening is the evidence that this process works. No false connections appear and vanish. No bridge that exists at step N disappears at step N+1. The engine's self-review is conservative: it accumulates confidence, never fabricates it.
 
@@ -313,18 +313,18 @@ The collision engine pattern-matches, specifically:
 |-----------|-------------------|-----------------|
 | Perception | Structured input | Reads triples from the ontology |
 | Recognition | Identify regularity | Template collision — two patterns share a template |
-| Abstraction | Specific → general | Wildcarding — replace leaf tokens with variables |
+| Abstraction | Specific to general | Wildcarding — replace leaf tokens with variables |
 | Memory | Store and retrieve | The database — all prior results available |
-| Inference | Known → new | P2 theory formation — shared membership produces new structure |
+| Inference | Known to new | P2 theory formation — shared membership produces new structure |
 | Composition | Chain inferences | Bootstrap — step N output becomes step N+1 input |
 | Transfer | Cross-domain | Cross-domain bridges — arithmetic structure found in set theory |
 | Self-correction | Revise on evidence | Monotonic strengthening — no false results survive |
 
 These are not analogies to the operations of reasoning. They are the operations of reasoning. Template collision does not resemble pattern recognition — it IS pattern recognition, performed on algebraic structure instead of sensory input. Theory formation does not resemble inference — it IS inference, deriving new structural facts from known ones.
 
-The outputs confirm this. The engine discovers genuine mathematical structure that aligns with known theorems (monoid, Boolean algebra, lattice theory). It transfers across domain boundaries (arithmetic → sets → bitwise). It accumulates knowledge iteratively, each step building on the last. It never fabricates — no false bridge appears and persists. These are the properties we demand of any reasoning process: correctness, generality, compositionality, reliability.
+The outputs confirm this. The engine discovers genuine mathematical structure that aligns with known theorems (monoid, Boolean algebra, lattice theory). It transfers across domain boundaries (arithmetic to sets to bitwise). It accumulates knowledge iteratively, each step building on the last. It never fabricates — no false bridge appears and persists. These are the properties we demand of any reasoning process: correctness, generality, compositionality, reliability.
 
-This is not a claim of consciousness. There is nothing it is like to be the engine. It has no experience of discovering that + and ∪ are both commutative monoids. But consciousness and reasoning are different claims, and conflating them is the error that makes mechanical reasoning seem paradoxical. A thermostat does not reason — it matches one pattern (temperature above threshold → off). The engine matches thousands of patterns across multiple levels of abstraction, composes them iteratively, transfers them across domains, and produces verifiably correct novel structure. The difference between a thermostat and a reasoner is not the presence of some non-physical ingredient. It is the depth, breadth, and compositionality of the pattern matching. The engine has these.
+This is not a claim of consciousness. There is nothing it is like to be the engine. It has no experience of discovering that + and ∪ are both commutative monoids. But consciousness and reasoning are different claims, and conflating them is the error that makes mechanical reasoning seem paradoxical. A thermostat does not reason — it matches one pattern (temperature above threshold then off). The engine matches thousands of patterns across multiple levels of abstraction, composes them iteratively, transfers them across domains, and produces verifiably correct novel structure. The difference between a thermostat and a reasoner is not the presence of some non-physical ingredient. It is the depth, breadth, and compositionality of the pattern matching. The engine has these.
 
 The honest framing: the engine implements the minimal sufficient set for mathematical reasoning — perception, recognition, abstraction, memory, inference, composition, transfer, and self-correction — using algebraic pattern matching on structural representations. It lacks intentionality (it does not choose what to investigate), metacognition (it cannot reflect on its own process), and consciousness (there is nothing it is like to be it). These are features of the full human cognitive package, not prerequisites for reasoning. A system that recognises, abstracts, infers, composes, transfers, and self-corrects is reasoning, whether or not it knows that it is.
 
