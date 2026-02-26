@@ -1,0 +1,3 @@
+["gcd", "ℒ", ["hasId", "gcd", "∅"]]
+["gcd", "ℒ", ["commut", "gcd"]]
+["lcm", "ℒ", ["hasId", "lcm", "𝟙"]]

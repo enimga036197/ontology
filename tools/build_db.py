@@ -67,7 +67,7 @@ def load_layers():
     """Load all triples from JSONL layer files."""
     triples = []
     for path in sorted(glob.glob(os.path.join(LAYERS_DIR, "*.jsonl"))):
-        layer = int(os.path.basename(path).split("_")[0])
+        layer = float(os.path.basename(path).split("_")[0])
         with open(path, "r", encoding="utf-8") as f:
             for line_num, line in enumerate(f, 1):
                 line = line.strip()
@@ -197,7 +197,7 @@ def build_database(symbols, triples):
             glyph TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             role TEXT NOT NULL,
-            layer INTEGER NOT NULL,
+            layer REAL NOT NULL,
             depth INTEGER NOT NULL DEFAULT 0,
             token TEXT NOT NULL UNIQUE
         );
@@ -207,7 +207,7 @@ def build_database(symbols, triples):
             subject TEXT NOT NULL,
             operator TEXT NOT NULL,
             object TEXT NOT NULL,
-            layer INTEGER NOT NULL,
+            layer REAL NOT NULL,
             line INTEGER NOT NULL,
             form TEXT NOT NULL,
             depth INTEGER NOT NULL DEFAULT 0
