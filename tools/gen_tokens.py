@@ -13,9 +13,9 @@ import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-SYMBOLS_FILE = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "symbols.json"
-)
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_SET = os.environ.get("ONTOLOGY_SET", "main")
+SYMBOLS_FILE = os.path.join(_ROOT, "sets", _SET, "symbols.json")
 
 
 def random_token(used):

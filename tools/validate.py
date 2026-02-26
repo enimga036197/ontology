@@ -1,9 +1,11 @@
 """Validate ontology layer files."""
 import json
+import os
 import sys
 from pathlib import Path
 
-LAYERS_DIR = Path(__file__).parent.parent / "layers"
+_SET = os.environ.get("ONTOLOGY_SET", "main")
+LAYERS_DIR = Path(__file__).parent.parent / "sets" / _SET / "layers"
 
 # Valid middle-position operators (all operators that appear in the operator slot of triples)
 VALID_OPERATORS = {"⊨", "⌂", "≡", "↦", "ℒ", "=", "≠", "⊏", "⋔", "!", "?", "𝕧", "Ϛ", "ℛ", "⇒"}

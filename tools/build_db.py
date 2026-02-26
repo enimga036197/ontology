@@ -20,9 +20,11 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LAYERS_DIR = os.path.join(ROOT, "layers")
-SYMBOLS_FILE = os.path.join(ROOT, "symbols.json")
-DB_FILE = os.path.join(ROOT, "ontology.db")
+SET_NAME = os.environ.get("ONTOLOGY_SET", "main")
+SET_DIR = os.path.join(ROOT, "sets", SET_NAME)
+LAYERS_DIR = os.path.join(SET_DIR, "layers")
+SYMBOLS_FILE = os.path.join(SET_DIR, "symbols.json")
+DB_FILE = os.path.join(SET_DIR, "ontology.db")
 
 # --- Form classification by operator ---
 FORM_MAP = {
@@ -312,6 +314,18 @@ def print_stats(conn, symbols, triples, passes):
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Build ontology.db from layer files")
+    parser.add_argument("--set", default=os.environ.get("ONTOLOGY_SET", "main"),
+                        help="Ontology set name (default: main)")
+    args = parser.parse_args()
+
+    global LAYERS_DIR, SYMBOLS_FILE, DB_FILE, SET_DIR
+    SET_DIR = os.path.join(ROOT, "sets", args.set)
+    LAYERS_DIR = os.path.join(SET_DIR, "layers")
+    SYMBOLS_FILE = os.path.join(SET_DIR, "symbols.json")
+    DB_FILE = os.path.join(SET_DIR, "ontology.db")
+
     # Load label data
     with open(SYMBOLS_FILE, "r", encoding="utf-8") as f:
         label_data = json.load(f)

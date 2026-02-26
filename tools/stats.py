@@ -1,5 +1,6 @@
 """Ontology statistics — symbol usage, operator distribution, layer breakdown."""
 import json
+import os
 import sys
 import io
 from collections import Counter
@@ -7,7 +8,8 @@ from pathlib import Path
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
-LAYERS_DIR = Path(__file__).parent.parent / "layers"
+_SET = os.environ.get("ONTOLOGY_SET", "main")
+LAYERS_DIR = Path(__file__).parent.parent / "sets" / _SET / "layers"
 
 
 def collect_symbols(obj):

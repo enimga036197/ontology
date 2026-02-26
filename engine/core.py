@@ -28,8 +28,10 @@ if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding.lower() !
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ONTOLOGY_DB = os.path.join(ROOT, "ontology.db")
-ENGINE_DB = os.path.join(ROOT, "engine", "engine.db")
+SET_NAME = os.environ.get("ONTOLOGY_SET", "main")
+SET_DIR = os.path.join(ROOT, "sets", SET_NAME)
+ONTOLOGY_DB = os.path.join(SET_DIR, "ontology.db")
+ENGINE_DB = os.path.join(SET_DIR, "engine.db")
 
 
 def apply_pragmas(conn):

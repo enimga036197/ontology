@@ -5,9 +5,10 @@ if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding.lower() !
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SET_DIR = os.path.join(ROOT, "sets", os.environ.get("ONTOLOGY_SET", "main"))
 
-eng = sqlite3.connect(os.path.join(ROOT, "engine", "engine.db"))
-ont = sqlite3.connect(os.path.join(ROOT, "ontology.db"))
+eng = sqlite3.connect(os.path.join(SET_DIR, "engine.db"))
+ont = sqlite3.connect(os.path.join(SET_DIR, "ontology.db"))
 ec = eng.cursor()
 oc = ont.cursor()
 

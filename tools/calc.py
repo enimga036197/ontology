@@ -5,8 +5,11 @@ import sys, os, json, sqlite3
 
 # ── 1. Loader ────────────────────────────────────────────────────────────────
 
-DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'ontology.db')
-SYM_PATH = os.path.join(os.path.dirname(__file__), '..', 'symbols.json')
+_ROOT = os.path.join(os.path.dirname(__file__), '..')
+_SET = os.environ.get("ONTOLOGY_SET", "main")
+_SET_DIR = os.path.join(_ROOT, 'sets', _SET)
+DB_PATH = os.path.join(_SET_DIR, 'ontology.db')
+SYM_PATH = os.path.join(_SET_DIR, 'symbols.json')
 
 VARIABLES = set('𝒶𝒷𝒸𝒹𝓀𝓃ℓ')
 

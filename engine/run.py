@@ -8,7 +8,7 @@ Output shows three streams:
 
 All state lives in SQLite. No OOM regardless of scale.
 
-Usage: python engine/run.py [--steps N]
+Usage: python engine/run.py [--steps N] [--set NAME]
 """
 
 import argparse
@@ -21,6 +21,12 @@ import time
 
 if not isinstance(sys.stdout, io.TextIOWrapper) or sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+
+# Pre-parse --set before importing core (which reads ONTOLOGY_SET at import time)
+_pre = argparse.ArgumentParser(add_help=False)
+_pre.add_argument("--set", default=os.environ.get("ONTOLOGY_SET", "main"))
+_pre_args, _ = _pre.parse_known_args()
+os.environ["ONTOLOGY_SET"] = _pre_args.set
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from core import (
