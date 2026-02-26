@@ -237,6 +237,7 @@ def create_engine_db():
             subject_set_key TEXT NOT NULL,
             collision_ids TEXT NOT NULL,
             collision_count INTEGER NOT NULL,
+            collision_score REAL NOT NULL DEFAULT 0.0,
             subject_count INTEGER NOT NULL,
             step INTEGER NOT NULL,
             output_token TEXT UNIQUE,
@@ -641,9 +642,9 @@ def generate_membership_hashes(engine_conn, step, max_drops=2, min_subset_size=2
 
 
 def get_known_membership_collisions(engine_conn):
-    """Get map of subject_set_key -> max collision_count seen so far."""
+    """Get map of subject_set_key -> max collision_score seen so far."""
     ec = engine_conn.cursor()
-    ec.execute("SELECT subject_set_key, MAX(collision_count) FROM membership_collisions GROUP BY subject_set_key")
+    ec.execute("SELECT subject_set_key, MAX(collision_score) FROM membership_collisions GROUP BY subject_set_key")
     return dict(ec.fetchall())
 
 
@@ -683,22 +684,28 @@ def find_membership_collisions(engine_conn, step, used_tokens, known_membership_
 
     for subject_set_key, cnt in candidates:
         ec.execute(
-            "SELECT DISTINCT collision_id FROM membership_hashes WHERE subject_set_key = ?",
+            """SELECT DISTINCT mh.collision_id, c.member_count
+               FROM membership_hashes mh
+               JOIN collisions c ON c.id = mh.collision_id
+               WHERE mh.subject_set_key = ?""",
             (subject_set_key,),
         )
-        collision_ids = sorted(row[0] for row in ec.fetchall())
+        rows = ec.fetchall()
+        collision_ids = sorted(r[0] for r in rows)
         collision_count = len(collision_ids)
+        # Specificity score: rarer collisions (fewer members) carry more weight
+        collision_score = sum(1.0 / max(r[1], 1) for r in rows)
 
         subject_set = json.loads(subject_set_key)
         subject_count = len(subject_set)
 
-        prev_max = known_membership_max.get(subject_set_key, 0)
-        if collision_count <= prev_max:
+        prev_max = known_membership_max.get(subject_set_key, 0.0)
+        if collision_score <= prev_max:
             continue
 
         if prev_max > 0:
             grew += 1
-        known_membership_max[subject_set_key] = collision_count
+        known_membership_max[subject_set_key] = collision_score
 
         # Mint theory token
         theory_token = mint_token(used_tokens)
@@ -726,15 +733,16 @@ def find_membership_collisions(engine_conn, step, used_tokens, known_membership_
             "subject_set": subject_set,
             "collision_ids": collision_ids,
             "collision_count": collision_count,
+            "collision_score": collision_score,
             "subject_count": subject_count,
         }
         definition_json = json.dumps(definition, ensure_ascii=False)
 
         ec.execute(
             """INSERT INTO membership_collisions
-               (subject_set_key, collision_ids, collision_count, subject_count, step, output_token, definition)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (subject_set_key, json.dumps(collision_ids), collision_count, subject_count,
+               (subject_set_key, collision_ids, collision_count, collision_score, subject_count, step, output_token, definition)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (subject_set_key, json.dumps(collision_ids), collision_count, collision_score, subject_count,
              step, theory_token, definition_json),
         )
         mc_id = ec.lastrowid
@@ -750,8 +758,8 @@ def find_membership_collisions(engine_conn, step, used_tokens, known_membership_
             (theory_token, f"theory-{mc_id}", step),
         )
 
-        # Derived patterns
-        derived_weight = min(1.0, (collision_count * subject_count) / 20.0)
+        # Derived patterns — weight by specificity-aware score
+        derived_weight = min(1.0, (collision_score * subject_count) / 20.0)
 
         # Pattern 1: Theory definition [theory, ≡, conjunction]
         theory_triple = [theory_token, equiv_token, conj_expr]
@@ -778,8 +786,9 @@ def find_membership_collisions(engine_conn, step, used_tokens, known_membership_
             "subject_set": subject_set,
             "collision_ids": collision_ids,
             "collision_count": collision_count,
+            "collision_score": round(collision_score, 2),
             "subject_count": subject_count,
-            "grew_from": prev_max if prev_max > 0 else None,
+            "grew_from": round(prev_max, 2) if prev_max > 0 else None,
         })
 
         del collision_ids, subject_set, member_collision_tokens

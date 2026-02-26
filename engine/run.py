@@ -76,7 +76,8 @@ def fmt_collision(result, token_to_glyph):
 def fmt_membership_collision(result, token_to_glyph):
     """Format a membership collision (theory) as a compact string."""
     grew = result.get("grew_from")
-    prefix = f"GREW {grew}\u2192{result['collision_count']}" if grew else f"NEW  {result['collision_count']} coll"
+    score = result.get("collision_score", result["collision_count"])
+    prefix = f"GREW {grew}\u2192{score}" if grew else f"NEW  {result['collision_count']}coll w={score}"
 
     coll_names = [f"C{cid}" for cid in result["collision_ids"]]
     shown = coll_names[:5]
