@@ -773,14 +773,15 @@ def find_membership_collisions(engine_conn, step, used_tokens, known_membership_
         )
 
         # Pattern 2: Membership assertions [subject, ∈, theory]
-        for subj_tok in subject_set:
-            membership_triple = [subj_tok, member_of_token, theory_token]
-            membership_shape = compute_shape(membership_triple)
-            ec.execute(
-                "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, ?, ?, 'derived', ?)",
-                (json.dumps(membership_triple, ensure_ascii=False), membership_shape,
-                 member_of_token, step, step + 1, derived_weight * 0.5),
-            )
+        if member_of_token is not None:
+            for subj_tok in subject_set:
+                membership_triple = [subj_tok, member_of_token, theory_token]
+                membership_shape = compute_shape(membership_triple)
+                ec.execute(
+                    "INSERT INTO patterns (triple, shape, operator, step, depth, origin, weight) VALUES (?, ?, ?, ?, ?, 'derived', ?)",
+                    (json.dumps(membership_triple, ensure_ascii=False), membership_shape,
+                     member_of_token, step, step + 1, derived_weight * 0.5),
+                )
 
         new_results.append({
             "mc_id": mc_id,

@@ -14,6 +14,10 @@ Previous iterations in neuro-symbolic-llm, GCRE, maths-ai, compiled-ontology are
   - `symbols.json` — 215 symbols with names, roles, and opaque tokens
   - `ontology.db` — Built from layers by build_db.py
   - `engine.db` — Engine output
+- `sets/morals/` — Moral reasoning ontology set
+  - `layers/` — 12 layers (L00-L09, includes L06.5, L07.5)
+  - `symbols.json` — 111 symbols (58 inherited from L00-L02 + 53 moral-specific)
+  - `ontology.db` — 219 triples
 - `tools/` — build_db.py, validate.py, stats.py, calc.py, gen_tokens.py
 - `engine/` — Collision engine (core.py, run.py) + analysis scripts
 - `docs/` — Guide, engine reference, philosophy
@@ -75,7 +79,9 @@ The two phases bootstrap each other: P1 properties → P2 theories → derived p
 ## Status
 
 - 0 forward references across all layers (verified by `tools/validate.py`)
-- `ontology.db` rebuilt from layers via `tools/build_db.py` (377 triples)
+- `ontology.db` rebuilt from layers via `tools/build_db.py` (377 triples main, 219 morals)
 - Engine: specificity weighting + .5 law-pass layers committed
+- Engine: graceful handling when ∈ not in vocabulary (for sets without set theory)
 - Multi-set support: `sets/main/` structure, `--set` flag on all tools
 - Docs reorganized: `docs/guide.md`, `docs/engine.md`, `docs/philosophy.md`
+- Morals set: 12 layers, 219 triples, 143 P1 collisions + 25 theories in 3 steps

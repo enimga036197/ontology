@@ -1,0 +1,697 @@
+{
+  "⊨": {
+    "name": "entailment",
+    "role": "foundation",
+    "token": "196456"
+  },
+  "τ": {
+    "name": "type",
+    "role": "foundation",
+    "token": "184541"
+  },
+  "ρ": {
+    "name": "relation",
+    "role": "foundation",
+    "token": "517486"
+  },
+  "⊤": {
+    "name": "true",
+    "role": "foundation",
+    "token": "375281"
+  },
+  "=": {
+    "name": "equality",
+    "role": "foundation",
+    "token": "443764"
+  },
+  "Δ": {
+    "name": "natural",
+    "role": "foundation",
+    "token": "441733"
+  },
+  "θ": {
+    "name": "binder",
+    "role": "foundation",
+    "token": "339397"
+  },
+  "Κ": {
+    "name": "kind",
+    "role": "foundation",
+    "token": "216513"
+  },
+  "Τ": {
+    "name": "type-constructor",
+    "role": "foundation",
+    "token": "749437"
+  },
+  "Ο": {
+    "name": "operation",
+    "role": "foundation",
+    "token": "823579"
+  },
+  "⌂": {
+    "name": "inhabitation",
+    "role": "operator",
+    "token": "237246"
+  },
+  "≡": {
+    "name": "definition",
+    "role": "operator",
+    "token": "337881"
+  },
+  "↦": {
+    "name": "type-signature",
+    "role": "operator",
+    "token": "321635"
+  },
+  "ℒ": {
+    "name": "law",
+    "role": "operator",
+    "token": "472862"
+  },
+  "≠": {
+    "name": "inequality",
+    "role": "operator",
+    "token": "578722"
+  },
+  "ϑ": {
+    "name": "entailment-concept",
+    "role": "concept_atom",
+    "token": "364827"
+  },
+  "ς": {
+    "name": "subject-position",
+    "role": "structural",
+    "token": "879472"
+  },
+  "ο": {
+    "name": "object-position",
+    "role": "structural",
+    "token": "161125"
+  },
+  "π": {
+    "name": "projection",
+    "role": "structural",
+    "token": "924559"
+  },
+  "∅": {
+    "name": "empty",
+    "role": "structural",
+    "token": "247532"
+  },
+  "σ": {
+    "name": "successor",
+    "role": "operator",
+    "token": "834492"
+  },
+  "⊥": {
+    "name": "false",
+    "role": "structural",
+    "token": "453976"
+  },
+  "¬": {
+    "name": "negation",
+    "role": "operator",
+    "token": "176384"
+  },
+  "ℑ": {
+    "name": "identity",
+    "role": "structural",
+    "token": "659492"
+  },
+  "Σ": {
+    "name": "sum-fold",
+    "role": "operator",
+    "token": "873753"
+  },
+  "Θ": {
+    "name": "origin-relation",
+    "role": "structural",
+    "token": "992773"
+  },
+  "β": {
+    "name": "origin-concept",
+    "role": "concept_atom",
+    "token": "645623"
+  },
+  "ε": {
+    "name": "identity-concept",
+    "role": "concept_atom",
+    "token": "457329"
+  },
+  "λ": {
+    "name": "law-concept",
+    "role": "concept_atom",
+    "token": "876452"
+  },
+  "φ": {
+    "name": "inhabitation-concept",
+    "role": "concept_atom",
+    "token": "561922"
+  },
+  "𝟙": {
+    "name": "unit",
+    "role": "structural",
+    "token": "921358"
+  },
+  "→": {
+    "name": "function-type",
+    "role": "structural",
+    "token": "685964"
+  },
+  "Ν": {
+    "name": "negation-concept",
+    "role": "concept_atom",
+    "token": "974831"
+  },
+  "Λ": {
+    "name": "successor-concept",
+    "role": "concept_atom",
+    "token": "887481"
+  },
+  "η": {
+    "name": "type-annotation-concept",
+    "role": "concept_atom",
+    "token": "263497"
+  },
+  "μ": {
+    "name": "function-concept",
+    "role": "concept_atom",
+    "token": "759824"
+  },
+  "∀": {
+    "name": "universal",
+    "role": "operator",
+    "token": "896122"
+  },
+  "∃": {
+    "name": "existential",
+    "role": "operator",
+    "token": "491779"
+  },
+  "α": {
+    "name": "universal-concept",
+    "role": "concept_atom",
+    "token": "358191"
+  },
+  "ξ": {
+    "name": "existential-concept",
+    "role": "concept_atom",
+    "token": "164584"
+  },
+  "𝕧": {
+    "name": "variable-marker",
+    "role": "operator",
+    "token": "895717"
+  },
+  "ν": {
+    "name": "variable-concept",
+    "role": "concept_atom",
+    "token": "491336"
+  },
+  "∈": {
+    "name": "membership",
+    "role": "relation",
+    "token": "675623"
+  },
+  "∧": {
+    "name": "conjunction",
+    "role": "operator",
+    "token": "731161"
+  },
+  "κ": {
+    "name": "conjunction-concept",
+    "role": "concept_atom",
+    "token": "378386"
+  },
+  "ω": {
+    "name": "disjunction-concept",
+    "role": "concept_atom",
+    "token": "178418"
+  },
+  "∨": {
+    "name": "disjunction",
+    "role": "operator",
+    "token": "966348"
+  },
+  "⇒": {
+    "name": "implication",
+    "role": "operator",
+    "token": "679836"
+  },
+  "ψ": {
+    "name": "implication-concept",
+    "role": "concept_atom",
+    "token": "872245"
+  },
+  "⇔": {
+    "name": "biconditional",
+    "role": "operator",
+    "token": "578869"
+  },
+  "𝒶": {
+    "name": "var-a",
+    "role": "variable",
+    "token": "543112"
+  },
+  "𝒷": {
+    "name": "var-b",
+    "role": "variable",
+    "token": "746251"
+  },
+  "𝒸": {
+    "name": "var-c",
+    "role": "variable",
+    "token": "526389"
+  },
+  "𝒹": {
+    "name": "var-d",
+    "role": "variable",
+    "token": "979495"
+  },
+  "𝓀": {
+    "name": "var-k",
+    "role": "variable",
+    "token": "528854"
+  },
+  "𝓃": {
+    "name": "var-n",
+    "role": "variable",
+    "token": "631393"
+  },
+  "ℓ": {
+    "name": "var-l",
+    "role": "variable",
+    "token": "344662"
+  },
+  "⊗": {
+    "name": "product",
+    "role": "structural",
+    "token": "376994"
+  },
+  "Π": {
+    "name": "product-kind",
+    "role": "concept_atom",
+    "token": "773373"
+  },
+  "𝕍": {
+    "name": "valence",
+    "role": "type",
+    "token": "554563"
+  },
+  "𝔸": {
+    "name": "agent",
+    "role": "type",
+    "token": "233131"
+  },
+  "𝔄": {
+    "name": "action",
+    "role": "type",
+    "token": "961832"
+  },
+  "𝔖": {
+    "name": "state",
+    "role": "type",
+    "token": "238137"
+  },
+  "Ⅴ": {
+    "name": "valence-type-concept",
+    "role": "concept_atom",
+    "token": "139822"
+  },
+  "Ⅰ": {
+    "name": "agent-type-concept",
+    "role": "concept_atom",
+    "token": "315736"
+  },
+  "Ⅱ": {
+    "name": "action-type-concept",
+    "role": "concept_atom",
+    "token": "185686"
+  },
+  "Ⅲ": {
+    "name": "state-type-concept",
+    "role": "concept_atom",
+    "token": "533288"
+  },
+  "⊕": {
+    "name": "good",
+    "role": "structural",
+    "token": "913181"
+  },
+  "⊖": {
+    "name": "bad",
+    "role": "structural",
+    "token": "568589"
+  },
+  "℘": {
+    "name": "pain",
+    "role": "structural",
+    "token": "634435"
+  },
+  "ℌ": {
+    "name": "hunger",
+    "role": "structural",
+    "token": "712822"
+  },
+  "ℋ": {
+    "name": "happiness",
+    "role": "structural",
+    "token": "524357"
+  },
+  "ℱ": {
+    "name": "flourishing",
+    "role": "structural",
+    "token": "432687"
+  },
+  "𝔳": {
+    "name": "valence-of",
+    "role": "operator",
+    "token": "971598"
+  },
+  "𝔳ₒ": {
+    "name": "valence-op-concept",
+    "role": "concept_atom",
+    "token": "296929"
+  },
+  "𝔥": {
+    "name": "harms",
+    "role": "operator",
+    "token": "399439"
+  },
+  "𝔥ₒ": {
+    "name": "harms-concept",
+    "role": "concept_atom",
+    "token": "296873"
+  },
+  "𝔟": {
+    "name": "benefits",
+    "role": "operator",
+    "token": "318485"
+  },
+  "𝔟ₒ": {
+    "name": "benefits-concept",
+    "role": "concept_atom",
+    "token": "514843"
+  },
+  "↝": {
+    "name": "causes",
+    "role": "relation",
+    "token": "283157"
+  },
+  "↝ₒ": {
+    "name": "causes-concept",
+    "role": "concept_atom",
+    "token": "321584"
+  },
+  "⊸": {
+    "name": "intends",
+    "role": "relation",
+    "token": "676187"
+  },
+  "⊸ₒ": {
+    "name": "intends-concept",
+    "role": "concept_atom",
+    "token": "186975"
+  },
+  "⊛": {
+    "name": "consents",
+    "role": "relation",
+    "token": "888827"
+  },
+  "⊛ₒ": {
+    "name": "consents-concept",
+    "role": "concept_atom",
+    "token": "785142"
+  },
+  "□": {
+    "name": "obligatory",
+    "role": "relation",
+    "token": "278546"
+  },
+  "δ□": {
+    "name": "obligation-concept",
+    "role": "concept_atom",
+    "token": "799764"
+  },
+  "◊": {
+    "name": "permissible",
+    "role": "relation",
+    "token": "143448"
+  },
+  "δ◊": {
+    "name": "permission-concept",
+    "role": "concept_atom",
+    "token": "686799"
+  },
+  "⊘": {
+    "name": "forbidden",
+    "role": "relation",
+    "token": "811495"
+  },
+  "δ⊘": {
+    "name": "forbidden-concept",
+    "role": "concept_atom",
+    "token": "891659"
+  },
+  "♢": {
+    "name": "supererogatory",
+    "role": "relation",
+    "token": "782811"
+  },
+  "δ♢": {
+    "name": "supererogatory-concept",
+    "role": "concept_atom",
+    "token": "792157"
+  },
+  "univ": {
+    "name": "universalizability",
+    "role": "relation",
+    "token": "596473"
+  },
+  "recip": {
+    "name": "reciprocity",
+    "role": "relation",
+    "token": "788429"
+  },
+  "nonmal": {
+    "name": "non-maleficence",
+    "role": "relation",
+    "token": "378336"
+  },
+  "benef": {
+    "name": "beneficence",
+    "role": "relation",
+    "token": "696772"
+  },
+  "prop": {
+    "name": "proportionality",
+    "role": "relation",
+    "token": "718962"
+  },
+  "dbleff": {
+    "name": "double-effect",
+    "role": "relation",
+    "token": "531261"
+  },
+  "dntDual": {
+    "name": "deontic-duality",
+    "role": "relation",
+    "token": "134141"
+  },
+  "dntImpl": {
+    "name": "deontic-implication",
+    "role": "relation",
+    "token": "187841"
+  },
+  "⊏": {
+    "name": "domain",
+    "role": "operator",
+    "token": "244518"
+  },
+  "⋔": {
+    "name": "associates",
+    "role": "operator",
+    "token": "811454"
+  },
+  "⊳": {
+    "name": "containment",
+    "role": "relation",
+    "token": "221535"
+  },
+  "γ": {
+    "name": "containment-concept",
+    "role": "concept_atom",
+    "token": "778817"
+  },
+  "𝓛": {
+    "name": "logic-domain",
+    "role": "kind",
+    "token": "699223"
+  },
+  "𝓥": {
+    "name": "valence-domain",
+    "role": "kind",
+    "token": "747238"
+  },
+  "𝓜": {
+    "name": "moral-domain",
+    "role": "kind",
+    "token": "596623"
+  },
+  "𝓓": {
+    "name": "deontic-domain",
+    "role": "kind",
+    "token": "239867"
+  },
+  "𝓟": {
+    "name": "principle-domain",
+    "role": "kind",
+    "token": "671728"
+  },
+  "𝓕": {
+    "name": "variable-domain",
+    "role": "kind",
+    "token": "975417"
+  },
+  "𝔑": {
+    "name": "need",
+    "role": "type",
+    "token": "934934"
+  },
+  "Ⅳ": {
+    "name": "need-type-concept",
+    "role": "concept_atom",
+    "token": "518757"
+  },
+  "𝔞": {
+    "name": "agency",
+    "role": "structural",
+    "token": "896745"
+  },
+  "sust": {
+    "name": "sustenance",
+    "role": "structural",
+    "token": "541165"
+  },
+  "safe": {
+    "name": "safety",
+    "role": "structural",
+    "token": "656356"
+  },
+  "auto": {
+    "name": "autonomy",
+    "role": "structural",
+    "token": "195818"
+  },
+  "know": {
+    "name": "knowledge",
+    "role": "structural",
+    "token": "567465"
+  },
+  "well": {
+    "name": "wellbeing",
+    "role": "structural",
+    "token": "126791"
+  },
+  "conn": {
+    "name": "connection",
+    "role": "structural",
+    "token": "499599"
+  },
+  "⊝": {
+    "name": "deprives",
+    "role": "relation",
+    "token": "613875"
+  },
+  "⊞": {
+    "name": "fulfills",
+    "role": "relation",
+    "token": "829387"
+  },
+  "⊝ₒ": {
+    "name": "deprives-concept",
+    "role": "concept_atom",
+    "token": "732799"
+  },
+  "⊞ₒ": {
+    "name": "fulfills-concept",
+    "role": "concept_atom",
+    "token": "769288"
+  },
+  "𝔣": {
+    "name": "fear",
+    "role": "structural",
+    "token": "645947"
+  },
+  "𝔱": {
+    "name": "trust",
+    "role": "structural",
+    "token": "741298"
+  },
+  "𝔡": {
+    "name": "deception",
+    "role": "structural",
+    "token": "917882"
+  },
+  "𝔦": {
+    "name": "isolation",
+    "role": "structural",
+    "token": "978325"
+  },
+  "𝔠": {
+    "name": "coercion",
+    "role": "structural",
+    "token": "635587"
+  },
+  "𝔰": {
+    "name": "security",
+    "role": "structural",
+    "token": "455539"
+  },
+  "𝔩": {
+    "name": "liberty",
+    "role": "structural",
+    "token": "365182"
+  },
+  "𝔭": {
+    "name": "poverty",
+    "role": "structural",
+    "token": "945314"
+  },
+  "lie": {
+    "name": "lying",
+    "role": "structural",
+    "token": "915374"
+  },
+  "steal": {
+    "name": "stealing",
+    "role": "structural",
+    "token": "663323"
+  },
+  "help": {
+    "name": "helping",
+    "role": "structural",
+    "token": "165223"
+  },
+  "kill": {
+    "name": "killing",
+    "role": "structural",
+    "token": "159732"
+  },
+  "shield": {
+    "name": "protecting",
+    "role": "structural",
+    "token": "985385"
+  },
+  "coerce": {
+    "name": "coercing",
+    "role": "structural",
+    "token": "543761"
+  },
+  "𝓐": {
+    "name": "agency-domain",
+    "role": "kind",
+    "token": "241649"
+  }
+}

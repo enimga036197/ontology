@@ -134,7 +134,7 @@ def run(num_steps=100):
         used_tokens = get_used_tokens(engine_conn)
         equiv_token = glyph_map["≡"]
         conj_token = glyph_map["∧"]
-        member_of_token = glyph_map["∈"]
+        member_of_token = glyph_map.get("∈")
 
         # Phase 1: Template collisions
         new_results, confirmed, grew = find_and_process_collisions(
