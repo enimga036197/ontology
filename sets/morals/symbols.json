@@ -693,5 +693,65 @@
     "name": "agency-domain",
     "role": "kind",
     "token": "241649"
+  },
+  "𝔯": {
+    "name": "ruin",
+    "role": "structural",
+    "token": "648988"
+  },
+  "𝔢": {
+    "name": "empowerment",
+    "role": "structural",
+    "token": "722275"
+  },
+  "𝔤": {
+    "name": "grief",
+    "role": "structural",
+    "token": "675112"
+  },
+  "𝔫": {
+    "name": "nurture",
+    "role": "structural",
+    "token": "738567"
+  },
+  "𝔧": {
+    "name": "justice",
+    "role": "structural",
+    "token": "524661"
+  },
+  "𝔬": {
+    "name": "oppression",
+    "role": "structural",
+    "token": "768419"
+  },
+  "teach": {
+    "name": "teaching",
+    "role": "structural",
+    "token": "973831"
+  },
+  "betray": {
+    "name": "betraying",
+    "role": "structural",
+    "token": "143574"
+  },
+  "heal": {
+    "name": "healing",
+    "role": "structural",
+    "token": "156131"
+  },
+  "enslave": {
+    "name": "enslaving",
+    "role": "structural",
+    "token": "549345"
+  },
+  "punish": {
+    "name": "punishing",
+    "role": "structural",
+    "token": "471128"
+  },
+  "share": {
+    "name": "sharing",
+    "role": "structural",
+    "token": "919244"
   }
 }
