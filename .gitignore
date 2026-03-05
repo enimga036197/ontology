@@ -7,3 +7,4 @@ engine/engine.db
 engine/engine.db-shm
 engine/engine.db-wal
 *.db
+context.md
