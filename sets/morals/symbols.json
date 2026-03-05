@@ -753,5 +753,190 @@
     "name": "sharing",
     "role": "structural",
     "token": "919244"
+  },
+  "nul": {
+    "name": "null-action",
+    "role": "structural",
+    "token": "344255"
+  },
+  "⊥ₐ": {
+    "name": "action-opposition",
+    "role": "relation",
+    "token": "573777"
+  },
+  "⊥ₐₒ": {
+    "name": "action-opposition-concept",
+    "role": "concept_atom",
+    "token": "556537"
+  },
+  "∧ₐ": {
+    "name": "action-conjunction",
+    "role": "operator",
+    "token": "456843"
+  },
+  "∧ₐₒ": {
+    "name": "action-conjunction-concept",
+    "role": "concept_atom",
+    "token": "383715"
+  },
+  "⊻ₐ": {
+    "name": "action-dilemma",
+    "role": "relation",
+    "token": "511521"
+  },
+  "⊻ₐₒ": {
+    "name": "action-dilemma-concept",
+    "role": "concept_atom",
+    "token": "961458"
+  },
+  "abs": {
+    "name": "impossible-action",
+    "role": "structural",
+    "token": "242875"
+  },
+  "∨ₐ": {
+    "name": "action-disjunction",
+    "role": "operator",
+    "token": "179538"
+  },
+  "∨ₐₒ": {
+    "name": "action-disjunction-concept",
+    "role": "concept_atom",
+    "token": "189348"
+  },
+  "¬ₐ": {
+    "name": "action-negation",
+    "role": "operator",
+    "token": "311139"
+  },
+  "¬ₐₒ": {
+    "name": "action-negation-concept",
+    "role": "concept_atom",
+    "token": "237992"
+  },
+  "𝔏": {
+    "name": "life-sphere",
+    "role": "type",
+    "token": "225439"
+  },
+  "Ⅵ": {
+    "name": "sphere-type-concept",
+    "role": "concept_atom",
+    "token": "629977"
+  },
+  "per": {
+    "name": "personal",
+    "role": "structural",
+    "token": "685449"
+  },
+  "soc": {
+    "name": "social",
+    "role": "structural",
+    "token": "669813"
+  },
+  "fin": {
+    "name": "financial",
+    "role": "structural",
+    "token": "681144"
+  },
+  "⊜ₒ": {
+    "name": "manifests-concept",
+    "role": "concept_atom",
+    "token": "986188"
+  },
+  "⊜": {
+    "name": "manifests",
+    "role": "relation",
+    "token": "663863"
+  },
+  "nour": {
+    "name": "nourishment",
+    "role": "structural",
+    "token": "539149"
+  },
+  "shel": {
+    "name": "shelter",
+    "role": "structural",
+    "token": "457218"
+  },
+  "hlth": {
+    "name": "health",
+    "role": "structural",
+    "token": "447277"
+  },
+  "phys": {
+    "name": "physical-integrity",
+    "role": "structural",
+    "token": "433485"
+  },
+  "psyc": {
+    "name": "psychological-security",
+    "role": "structural",
+    "token": "354826"
+  },
+  "stab": {
+    "name": "stability",
+    "role": "structural",
+    "token": "254227"
+  },
+  "chce": {
+    "name": "choice",
+    "role": "structural",
+    "token": "687483"
+  },
+  "self": {
+    "name": "self-direction",
+    "role": "structural",
+    "token": "894962"
+  },
+  "priv": {
+    "name": "privacy",
+    "role": "structural",
+    "token": "882545"
+  },
+  "trth": {
+    "name": "truth",
+    "role": "structural",
+    "token": "484342"
+  },
+  "comp": {
+    "name": "comprehension",
+    "role": "structural",
+    "token": "432758"
+  },
+  "disc": {
+    "name": "discovery",
+    "role": "structural",
+    "token": "234437"
+  },
+  "cmft": {
+    "name": "comfort",
+    "role": "structural",
+    "token": "664325"
+  },
+  "joy": {
+    "name": "joy",
+    "role": "structural",
+    "token": "865281"
+  },
+  "pace": {
+    "name": "peace",
+    "role": "structural",
+    "token": "666999"
+  },
+  "intm": {
+    "name": "intimacy",
+    "role": "structural",
+    "token": "141135"
+  },
+  "comm": {
+    "name": "community",
+    "role": "structural",
+    "token": "464367"
+  },
+  "stnd": {
+    "name": "standing",
+    "role": "structural",
+    "token": "746378"
   }
 }
