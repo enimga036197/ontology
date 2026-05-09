@@ -318,5 +318,55 @@
     "name": "implication-concept",
     "role": "concept_atom",
     "token": "173952"
+  },
+  "Ⓜ": {
+    "name": "measurement-outcome",
+    "role": "type",
+    "token": "364287"
+  },
+  "Ⓠ": {
+    "name": "measurement-query",
+    "role": "type",
+    "token": "491835"
+  },
+  "⊕": {
+    "name": "measurement-success",
+    "role": "structural",
+    "token": "528746"
+  },
+  "⊖": {
+    "name": "measurement-failure",
+    "role": "structural",
+    "token": "893624"
+  },
+  "□": {
+    "name": "unitary-obligation",
+    "role": "structural",
+    "token": "845127"
+  },
+  "◊": {
+    "name": "measurement-permission",
+    "role": "structural",
+    "token": "192468"
+  },
+  "✓": {
+    "name": "measurement-positive",
+    "role": "structural",
+    "token": "273581"
+  },
+  "✗": {
+    "name": "measurement-negative",
+    "role": "structural",
+    "token": "925638"
+  },
+  "!": {
+    "name": "eigenvalue-assertion",
+    "role": "operator",
+    "token": "187345"
+  },
+  "?": {
+    "name": "measurement-initiation",
+    "role": "operator",
+    "token": "462851"
   }
 }

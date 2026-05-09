@@ -324,11 +324,15 @@ If that file is written and audited and survives the kind of scrutiny that L00 h
 The hours already spent on the ontology are not lost work that has to be redone. They are the *prior art* that establishes that the structural template works in a domain (mathematics) where it can be audited rigorously. Translating to physics is a different domain but the same template. The template is the achievement; physics is the next application.
 
 
-## L00 Concretely: `sets/physics/`
+## L00–L04 Concretely: `sets/physics/`
 
-The L00 sketched above is now written as a parallel ontology set at `sets/physics/`. It is 58 triples in `layers/00_axioms.jsonl` over 44 symbols in `symbols.json`. It validates and builds against the same tooling that validates and builds `sets/main/`.
+The set sketched above is now written as a parallel ontology at `sets/physics/`. Five layers, 119 triples, 74 symbols. It validates and builds against the same tooling that validates and builds `sets/main/`.
 
-The bootstrap triple is `[⊢, ⊢, 𝓥]` — realization realizes itself at the vacuum, the principle of least action stated structurally as a self-affirming triple. The file mirrors `sets/main/layers/00_axioms.jsonl` position for position:
+The bootstrap triple is `[⊢, ⊢, 𝓥]` — realization realizes itself at the vacuum, the principle of least action stated structurally as a self-affirming triple.
+
+### Layer-by-layer correspondence
+
+**L00 (axioms — 58 triples).** Mirrors `sets/main/layers/00_axioms.jsonl` position for position:
 
 | Section | main/L00 | physics/L00 |
 |---|---|---|
@@ -340,18 +344,40 @@ The bootstrap triple is `[⊢, ⊢, 𝓥]` — realization realizes itself at th
 | Origin | `∅ ≡ Θ(Δ)` | `Ø ≡ Θ(𝓤)` |
 | Identity | `ℑ ≡ ℑ`, `= ≡ ρ(ℑ)` | `ℑ ≡ ℑ`, `= ≡ 𝓒(ℑ)` |
 | Meta-shared concept atoms | `ε λ φ` | `ε λ φ` |
-| Perspective-bottoms | `ϑ τ ⊤ β` (math) | `𝔠 𝔥 𝔤 𝔢 𝔞 𝔩 𝔨 𝔪` (physics constants) |
+| Perspective-bottoms | `ϑ τ ⊤ β` | `𝔠 𝔥 𝔤 𝔢 𝔞 𝔩 𝔨 𝔪` (illustratively c, ℏ, G, e, α, Λ, k_B, measurement) |
 
-The eight physics-perspective-bottoms (`𝔠 𝔥 𝔤 𝔢 𝔢 𝔞 𝔩 𝔨 𝔪`) are declared as self-defining concept atoms — the catalog of where this perspective bottoms out, in finite count, named, undisguised. They correspond illustratively to `c, ℏ, G, e, α, Λ, k_B`, and the measurement act. The exact mapping is negotiable; the position is not.
+The eight physics-perspective-bottoms are declared as self-defining concept atoms — the catalog of where this perspective bottoms out, in finite count, named, undisguised. The exact mapping to physical constants is negotiable; the position is not.
 
-What L00 does *not* yet contain (and what later layers would add):
+**L01 (handles — 11 triples).** Seven frame handles `𝓍 𝓎 𝓏 𝓊 𝓋 𝓌 𝓅`, declared via the `𝕗` marker, structurally interchangeable. Quantifiers `∀ ≡ 𝓟(α)` and `∃ ≡ 𝓟(ξ)` defined as path-bindings of universal/existential concept atoms. Type signature `∫ ↦ → 𝓍 𝓍` (the action-fold takes a configuration to a configuration). This is the minimum-sufficient-frame commitment, paid once.
 
-- L01 would declare the irreducible frame variables (the seven-handle commitment in main becomes seven physics handles here).
-- L02 would give the response-layer (`Ⓢ ! ⊤`-analog) — measurement encoded structurally as in main's L08.
-- L11-analog would carry the dual representation with bridge — position/momentum joined by Fourier-`ℛ`, with the noncommutator `[x̂, p̂] = iℏ` as the bridge-cost.
-- L14-analog would close the loop with `[universe, ℒ, [united-field-structure, universe, …]]`, the physics version of `[Δ, ℒ, [Semiring, Δ, +, ×]]`.
+**L02 (logic — 18 triples).** Boolean connectives `∧ ∨ ⇒ ⇔` with full truth tables over `𝓥` (vacuum/holds) and `⊥` (anti-vacuum/excluded). Same Boolean structure as main's L02, with physics symbols. Logic is universal — what changes is the truth-values it ranges over.
 
-This is L00 only. It is the bootstrap, paid once. Whether the next layers write themselves with the same forced-by-commitments quality the main ontology's later layers had is the open question that this artifact lets us actually attempt.
+**L03 (dynamical laws — 7 triples).** Action-fold reflexivity `∫(𝓍) = 𝓍` (a configuration is its own action-fold at the vacuum). Vacuum-point has no predecessor. Event-successor `σ` is injective, never returns to vacuum, never equals self. This is Peano-axioms cast as event-succession — the dynamical core of "events progress and don't fold back."
+
+**L04 (response — 25 triples).** The observer layer, mirroring main's L08. Encoded explicitly:
+
+| Construct | Definition | Physics meaning |
+|---|---|---|
+| `Ⓜ` | `[𝓜, 𝓤, 𝓥]` | measurement-outcome — what the apparatus says |
+| `Ⓠ` | `[𝓜, 𝓤, ⊥]` | measurement-query — what is being asked |
+| `⊕` | `[𝔬, 𝓤, 𝓥]` | success — apparatus registers |
+| `⊖` | `[𝔬, 𝓤, ⊥]` | failure — apparatus does not |
+| `□` | `[𝔬, 𝓤, 𝓤]` | unitary obligation — Schrödinger evolution must apply |
+| `◊` | `[𝔬, Ø, 𝓤]` | measurement permission — collapse may occur |
+| `✓` | `[⊕, □]` | positive — successful unitary completion |
+| `✗` | `[⊖, □]` | negative — failed unitary completion |
+
+The pivotal triple is `[?, ⇒, !]`: every well-formed measurement-query yields a measurement-assertion. Asking demands answering, in physics terms: every Hermitian observable, when measured, returns a real eigenvalue. The `□`/`◊` distinction is the structural dissolution of the unitary/measurement split — coexisting without collapse needing to be reduced to evolution or vice versa.
+
+### What is still unwritten
+
+The set so far has the bootstrap, the frame, logic, the dynamical core, and the observer. What it does not yet contain:
+
+- **The dual representation with bridge.** Position/momentum joined by Fourier-`ℛ`, with `[x̂, p̂] = iℏ` as the bridge-cost. This is a distinct layer requiring its own dual-number-style construction, and is the highest-leverage remaining piece — it is where wave-particle duality dissolves into Peano/digit duality.
+- **Domain compatibility.** Six physics domains (`𝓖 𝓔 𝓦 𝓢ₜ 𝓣 𝓕`) and their `⋔` table — the analog of main's L12.
+- **The closing self-recognition.** A final triple `[universe, ℒ, [united-field-structure, universe, …]]` that recognizes the universe as an instance of the structure the theory describes.
+
+Each of these is a distinct layer of work, requiring its own design decisions. What is written so far is the foundation on which they would sit, paid honestly, in the same structural style as the main ontology.
 
 
 ## Summary
