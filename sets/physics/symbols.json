@@ -1,0 +1,222 @@
+{
+  "⊢": {
+    "name": "realization",
+    "role": "foundation",
+    "token": "718492"
+  },
+  "𝓜": {
+    "name": "manifold",
+    "role": "foundation",
+    "token": "836271"
+  },
+  "𝓒": {
+    "name": "connection",
+    "role": "foundation",
+    "token": "519384"
+  },
+  "𝓥": {
+    "name": "vacuum",
+    "role": "foundation",
+    "token": "627815"
+  },
+  "=": {
+    "name": "equality",
+    "role": "foundation",
+    "token": "384962"
+  },
+  "𝓤": {
+    "name": "event-set",
+    "role": "foundation",
+    "token": "152736"
+  },
+  "𝓟": {
+    "name": "path-binder",
+    "role": "foundation",
+    "token": "784519"
+  },
+  "𝓡": {
+    "name": "representation",
+    "role": "foundation",
+    "token": "263847"
+  },
+  "𝓑": {
+    "name": "bundle",
+    "role": "foundation",
+    "token": "571928"
+  },
+  "𝓞": {
+    "name": "operator-primitive",
+    "role": "foundation",
+    "token": "947316"
+  },
+  "∫": {
+    "name": "action-fold",
+    "role": "foundation",
+    "token": "619472"
+  },
+  "⌂": {
+    "name": "foundation-marker",
+    "role": "operator",
+    "token": "523874"
+  },
+  "≡": {
+    "name": "definition",
+    "role": "operator",
+    "token": "836195"
+  },
+  "↦": {
+    "name": "type-signature",
+    "role": "operator",
+    "token": "274619"
+  },
+  "→": {
+    "name": "function-type",
+    "role": "structural",
+    "token": "458271"
+  },
+  "ℒ": {
+    "name": "law",
+    "role": "operator",
+    "token": "367419"
+  },
+  "≠": {
+    "name": "inequality",
+    "role": "operator",
+    "token": "718294"
+  },
+  "𝔯": {
+    "name": "realization-concept",
+    "role": "concept_atom",
+    "token": "894521"
+  },
+  "ς": {
+    "name": "subject-position",
+    "role": "structural",
+    "token": "157324"
+  },
+  "ο": {
+    "name": "object-position",
+    "role": "structural",
+    "token": "392716"
+  },
+  "π": {
+    "name": "projection",
+    "role": "structural",
+    "token": "685143"
+  },
+  "Ø": {
+    "name": "vacuum-point",
+    "role": "structural",
+    "token": "219584"
+  },
+  "⊥": {
+    "name": "anti-vacuum",
+    "role": "structural",
+    "token": "472361"
+  },
+  "¬": {
+    "name": "negation",
+    "role": "operator",
+    "token": "583729"
+  },
+  "σ": {
+    "name": "event-successor",
+    "role": "operator",
+    "token": "197846"
+  },
+  "𝟙": {
+    "name": "unit-event",
+    "role": "structural",
+    "token": "642185"
+  },
+  "Θ": {
+    "name": "origin-relation",
+    "role": "structural",
+    "token": "859317"
+  },
+  "𝔬": {
+    "name": "origin-concept",
+    "role": "concept_atom",
+    "token": "736241"
+  },
+  "𝔫": {
+    "name": "negation-concept",
+    "role": "concept_atom",
+    "token": "491862"
+  },
+  "𝔰": {
+    "name": "successor-concept",
+    "role": "concept_atom",
+    "token": "285173"
+  },
+  "ℑ": {
+    "name": "identity",
+    "role": "structural",
+    "token": "358741"
+  },
+  "ε": {
+    "name": "identity-concept",
+    "role": "concept_atom",
+    "token": "624819"
+  },
+  "λ": {
+    "name": "law-concept",
+    "role": "concept_atom",
+    "token": "936472"
+  },
+  "η": {
+    "name": "type-annotation-concept",
+    "role": "concept_atom",
+    "token": "471836"
+  },
+  "φ": {
+    "name": "foundation-concept",
+    "role": "concept_atom",
+    "token": "853219"
+  },
+  "μ": {
+    "name": "function-concept",
+    "role": "concept_atom",
+    "token": "297615"
+  },
+  "𝔠": {
+    "name": "causal-rate-concept",
+    "role": "concept_atom",
+    "token": "619428"
+  },
+  "𝔥": {
+    "name": "action-quantum-concept",
+    "role": "concept_atom",
+    "token": "384712"
+  },
+  "𝔤": {
+    "name": "gravitational-coupling-concept",
+    "role": "concept_atom",
+    "token": "526194"
+  },
+  "𝔢": {
+    "name": "charge-quantum-concept",
+    "role": "concept_atom",
+    "token": "738451"
+  },
+  "𝔞": {
+    "name": "fine-structure-concept",
+    "role": "concept_atom",
+    "token": "482673"
+  },
+  "𝔩": {
+    "name": "cosmological-concept",
+    "role": "concept_atom",
+    "token": "159724"
+  },
+  "𝔨": {
+    "name": "thermal-occupation-concept",
+    "role": "concept_atom",
+    "token": "627839"
+  },
+  "𝔪": {
+    "name": "measurement-concept",
+    "role": "concept_atom",
+    "token": "945286"
+  }
+}

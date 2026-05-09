@@ -324,6 +324,36 @@ If that file is written and audited and survives the kind of scrutiny that L00 h
 The hours already spent on the ontology are not lost work that has to be redone. They are the *prior art* that establishes that the structural template works in a domain (mathematics) where it can be audited rigorously. Translating to physics is a different domain but the same template. The template is the achievement; physics is the next application.
 
 
+## L00 Concretely: `sets/physics/`
+
+The L00 sketched above is now written as a parallel ontology set at `sets/physics/`. It is 58 triples in `layers/00_axioms.jsonl` over 44 symbols in `symbols.json`. It validates and builds against the same tooling that validates and builds `sets/main/`.
+
+The bootstrap triple is `[⊢, ⊢, 𝓥]` — realization realizes itself at the vacuum, the principle of least action stated structurally as a self-affirming triple. The file mirrors `sets/main/layers/00_axioms.jsonl` position for position:
+
+| Section | main/L00 | physics/L00 |
+|---|---|---|
+| Bootstrap | `[⊨, ⊨, ⊤]` | `[⊢, ⊢, 𝓥]` |
+| Validity | 11 `⊨ ⊤` | 11 `⊢ 𝓥` |
+| Foundation | 10 `⌂ ⊤` | 10 `⌂ 𝓥` |
+| Constructors | `τ ρ Ο Κ Τ θ Σ` | `𝓜 𝓒 𝓞 𝓡 𝓑 𝓟 ∫` |
+| Universe-set | `Δ ≡ Σ(Δ)` | `𝓤 ≡ ∫(𝓤)` |
+| Origin | `∅ ≡ Θ(Δ)` | `Ø ≡ Θ(𝓤)` |
+| Identity | `ℑ ≡ ℑ`, `= ≡ ρ(ℑ)` | `ℑ ≡ ℑ`, `= ≡ 𝓒(ℑ)` |
+| Meta-shared concept atoms | `ε λ φ` | `ε λ φ` |
+| Perspective-bottoms | `ϑ τ ⊤ β` (math) | `𝔠 𝔥 𝔤 𝔢 𝔞 𝔩 𝔨 𝔪` (physics constants) |
+
+The eight physics-perspective-bottoms (`𝔠 𝔥 𝔤 𝔢 𝔢 𝔞 𝔩 𝔨 𝔪`) are declared as self-defining concept atoms — the catalog of where this perspective bottoms out, in finite count, named, undisguised. They correspond illustratively to `c, ℏ, G, e, α, Λ, k_B`, and the measurement act. The exact mapping is negotiable; the position is not.
+
+What L00 does *not* yet contain (and what later layers would add):
+
+- L01 would declare the irreducible frame variables (the seven-handle commitment in main becomes seven physics handles here).
+- L02 would give the response-layer (`Ⓢ ! ⊤`-analog) — measurement encoded structurally as in main's L08.
+- L11-analog would carry the dual representation with bridge — position/momentum joined by Fourier-`ℛ`, with the noncommutator `[x̂, p̂] = iℏ` as the bridge-cost.
+- L14-analog would close the loop with `[universe, ℒ, [united-field-structure, universe, …]]`, the physics version of `[Δ, ℒ, [Semiring, Δ, +, ×]]`.
+
+This is L00 only. It is the bootstrap, paid once. Whether the next layers write themselves with the same forced-by-commitments quality the main ontology's later layers had is the open question that this artifact lets us actually attempt.
+
+
 ## Summary
 
 The ontology, read as a static object, is a worked example of a unified theory of mathematics that:
