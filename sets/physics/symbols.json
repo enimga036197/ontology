@@ -218,5 +218,105 @@
     "name": "measurement-concept",
     "role": "concept_atom",
     "token": "945286"
+  },
+  "∀": {
+    "name": "universal",
+    "role": "operator",
+    "token": "815473"
+  },
+  "∃": {
+    "name": "existential",
+    "role": "operator",
+    "token": "962584"
+  },
+  "𝕗": {
+    "name": "frame-handle-marker",
+    "role": "operator",
+    "token": "738291"
+  },
+  "α": {
+    "name": "universal-concept",
+    "role": "concept_atom",
+    "token": "426815"
+  },
+  "ξ": {
+    "name": "existential-concept",
+    "role": "concept_atom",
+    "token": "583749"
+  },
+  "𝔣": {
+    "name": "frame-handle-concept",
+    "role": "concept_atom",
+    "token": "691384"
+  },
+  "𝓍": {
+    "name": "handle-x",
+    "role": "variable",
+    "token": "247196"
+  },
+  "𝓎": {
+    "name": "handle-y",
+    "role": "variable",
+    "token": "358927"
+  },
+  "𝓏": {
+    "name": "handle-z",
+    "role": "variable",
+    "token": "481653"
+  },
+  "𝓊": {
+    "name": "handle-u",
+    "role": "variable",
+    "token": "596847"
+  },
+  "𝓋": {
+    "name": "handle-v",
+    "role": "variable",
+    "token": "671523"
+  },
+  "𝓌": {
+    "name": "handle-w",
+    "role": "variable",
+    "token": "749382"
+  },
+  "𝓅": {
+    "name": "handle-p",
+    "role": "variable",
+    "token": "814627"
+  },
+  "∧": {
+    "name": "conjunction",
+    "role": "operator",
+    "token": "528391"
+  },
+  "∨": {
+    "name": "disjunction",
+    "role": "operator",
+    "token": "716482"
+  },
+  "⇒": {
+    "name": "implication",
+    "role": "operator",
+    "token": "384759"
+  },
+  "⇔": {
+    "name": "biconditional",
+    "role": "operator",
+    "token": "957264"
+  },
+  "κ": {
+    "name": "conjunction-concept",
+    "role": "concept_atom",
+    "token": "642837"
+  },
+  "ω": {
+    "name": "disjunction-concept",
+    "role": "concept_atom",
+    "token": "891574"
+  },
+  "ψ": {
+    "name": "implication-concept",
+    "role": "concept_atom",
+    "token": "173952"
   }
 }

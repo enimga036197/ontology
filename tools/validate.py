@@ -9,7 +9,8 @@ LAYERS_DIR = Path(__file__).parent.parent / "sets" / _SET / "layers"
 
 # Valid middle-position operators (all operators that appear in the operator slot of triples)
 # ⊨ is main's "entails" / validity operator; ⊢ is the physics set's "is realized" / on-shell operator.
-VALID_OPERATORS = {"⊨", "⊢", "⌂", "≡", "↦", "ℒ", "=", "≠", "⊏", "⋔", "!", "?", "𝕧", "Ϛ", "ℛ", "⇒"}
+# 𝕧 is main's variable-marker; 𝕗 is the physics set's frame-handle marker.
+VALID_OPERATORS = {"⊨", "⊢", "⌂", "≡", "↦", "ℒ", "=", "≠", "⊏", "⋔", "!", "?", "𝕧", "𝕗", "Ϛ", "ℛ", "⇒"}
 
 
 def validate_triple(triple, file, line_num):
