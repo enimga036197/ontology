@@ -354,6 +354,25 @@ The eight physics-perspective-bottoms are declared as self-defining concept atom
 
 **L03 (dynamical laws — 7 triples).** Action-fold reflexivity `∫(𝓍) = 𝓍` (a configuration is its own action-fold at the vacuum). Vacuum-point has no predecessor. Event-successor `σ` is injective, never returns to vacuum, never equals self. This is Peano-axioms cast as event-succession — the dynamical core of "events progress and don't fold back."
 
+**L03.5 (dynamical law-concepts — 15 triples).** Companion to L03 in the `.5` style of main's `05.5`, `06.5`, `07.5`, `09.5`, `13.5`. Defines abstract law-concepts at the layer where their first concrete instances exist:
+
+- `reflex`: `∀ 𝓍, op(𝓍) = 𝓍` — applied to `=` and `∫`
+- `injective`: `∀ 𝓍 𝓏, op(𝓍) = op(𝓏) ⇒ 𝓍 = 𝓏` — applied to `σ`
+- `irreflex`: `∀ 𝓍, op(𝓍) ≠ 𝓍` — applied to `σ`
+- `grounded`: `¬∃ 𝓍, op(𝓍) = 𝓏` — applied to `σ` at `Ø`
+
+And introduces `couples` — the abstraction that binds an operator to its perspective-bottom: `couples ≡ ⊢(𝓒(𝓎, 𝓏))`. The eight perspective-bottoms move from decorative to load-bearing:
+
+| Operator | Couples to | Bottom |
+|---|---|---|
+| `⊢` | `𝔯` | realization-concept |
+| `σ` | `𝔠` | causal-rate (events progress at bounded speed) |
+| `∫` | `𝔥` | action-quantum |
+| `Θ` | `𝔩` | cosmological-origin |
+| `=` | `ε` | identity-concept |
+
+This is the `.5` discipline: abstract law-concepts factored at first instance, used compactly afterward, and serving as the structural attachment point for the perspective-bottoms. Without these couplings, `𝔠 ≡ 𝔠` is just naming; with them, it is the bottom that `σ`'s causality grounds out at.
+
 **L04 (response — 25 triples).** The observer layer, mirroring main's L08. Encoded explicitly:
 
 | Construct | Definition | Physics meaning |
@@ -368,6 +387,23 @@ The eight physics-perspective-bottoms are declared as self-defining concept atom
 | `✗` | `[⊖, □]` | negative — failed unitary completion |
 
 The pivotal triple is `[?, ⇒, !]`: every well-formed measurement-query yields a measurement-assertion. Asking demands answering, in physics terms: every Hermitian observable, when measured, returns a real eigenvalue. The `□`/`◊` distinction is the structural dissolution of the unitary/measurement split — coexisting without collapse needing to be reduced to evolution or vice versa.
+
+**L04.5 (response law-concepts — 10 triples).** Companion `.5` for L04. Factors:
+
+- `well_formed`: `∀ 𝓍, ?(𝓍) ⇒ !(𝓍)` — every query implies its assertion (the `[?, ⇒, !]` schema lifted to a named law-concept)
+- `dual_modal`: `□(𝓍) ⇔ ¬◊(¬𝓍)` — obligation as not-permitted-not, the modal duality that ties unitary evolution to measurement permission
+- `complete_state`: `∀ 𝓍, 𝓍 = 𝓥 ∨ 𝓍 = ⊥` — measurement outcomes are exhaustive
+
+Couplings:
+
+| Operator | Couples to | Bottom |
+|---|---|---|
+| `Ⓜ` | `𝔪` | measurement-concept |
+| `Ⓜ` | `𝔥` | action-quantum (every measurement carries action ≥ ℏ) |
+| `◊` | `𝔪` | measurement-concept |
+| `□` | `𝔥` | action-quantum (unitary evolution is action-parameterized) |
+
+This is the second place perspective-bottoms become load-bearing. `𝔪` and `𝔥` are now structurally tied to the response layer — measurement is bottoms-out at the measurement-concept and is action-quantized.
 
 ### What is still unwritten
 

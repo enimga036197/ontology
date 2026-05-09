@@ -368,5 +368,45 @@
     "name": "measurement-initiation",
     "role": "operator",
     "token": "462851"
+  },
+  "reflex": {
+    "name": "reflexivity",
+    "role": "relation",
+    "token": "615384"
+  },
+  "injective": {
+    "name": "injectivity",
+    "role": "relation",
+    "token": "837296"
+  },
+  "irreflex": {
+    "name": "irreflexivity",
+    "role": "relation",
+    "token": "728459"
+  },
+  "grounded": {
+    "name": "groundedness",
+    "role": "relation",
+    "token": "491836"
+  },
+  "couples": {
+    "name": "couples-to-bottom",
+    "role": "relation",
+    "token": "264719"
+  },
+  "well_formed": {
+    "name": "well-formed-query",
+    "role": "relation",
+    "token": "583716"
+  },
+  "dual_modal": {
+    "name": "dual-modality",
+    "role": "relation",
+    "token": "947285"
+  },
+  "complete_state": {
+    "name": "complete-state",
+    "role": "relation",
+    "token": "167459"
   }
 }
